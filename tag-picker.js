@@ -41,10 +41,8 @@ class TagPicker extends LitElement {
 				type: String,
 				value: ''
 			},
-			values: {
+			tags: {
 				type: Array,
-				value() { return []; },
-				notify: true
 			},
 			_activeValueIndex: {
 				type: Number,
@@ -270,17 +268,21 @@ class TagPicker extends LitElement {
 		super();
 
 		if (!this.prop1) this.prop1 = 'tag-picker (default value)';
-		this.tags = [{value: 'one'}, {value: 'two'}, {value: 'three'}];
+		// this.tags = [{value: 'one'}, {value: 'two'}, {value: 'three'}];
+		this.tags = [];
 		this.text = '';
-		this.tags.forEach(v => {
-			v.deleteMe = () => {
-				this._removeSelected(this.tags.indexOf(v));
-			};
-			// note: binding the index instead of creating a new arrow function doesn't work,
-			// because each item's index is captured once and never updated,
-			// which breaks as soon as you have any kind of dynamic list
-			// v.deleteMe = this._removeSelected.bind(this, this.tags.indexOf(v));
-		});
+		// this.tags.forEach(v => {
+		// 	v.deleteMe = () => {
+		// 		this._removeSelected(this.tags.indexOf(v));
+		// 	};
+		// 	// note: binding the index instead of creating a new arrow function doesn't work,
+		// 	// because each item's index is captured once and never updated,
+		// 	// which breaks as soon as you have any kind of dynamic list
+		// 	// v.deleteMe = this._removeSelected.bind(this, this.tags.indexOf(v));
+		// });
+		this._addTag('one');
+		this._addTag('two');
+		this._addTag('three');
 
 		this._filteredData = ['four', 'five', 'six'];
 		this.allowFreeform = true;
@@ -297,9 +299,9 @@ class TagPicker extends LitElement {
 		<div class="content js-refocusTarget">
 		<!-- <template is="dom-repeat" items="[[values]]"> -->
 		<!-- replace these divs with tags when we're done with everything else -->
-		${this.tags.map((item, index) => html`
+		${this.tags.map((item) => html`
 			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
-				${index}, ${this._computeDisplay(item)}
+				${this._computeDisplay(item)}
 				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
 				</d2l-icon>
 			</div>`)}
@@ -344,13 +346,13 @@ class TagPicker extends LitElement {
 		slot="dropdown-content" 
 		id="${this._applyPrefix(this._uniqueId, 'dropdown')}" 
 		role="listbox" 
-		aria-multiselectable="true">
+		aria-multiselectable="true"
+		@change="${this._onListItemTapped}">
 		${this._filteredData.map(item => html`
 			<option aria-label="${this._textForItem(item)}" 
 			aria-selected="${this._computeAriaSelected(this._dropdownIndex, this._filteredData, item)}" 
 			class="${this._computeListItemClass(this._dropdownIndex, this._filteredData, item)}" 
-			@mouseover="_onListItemMouseOver" 
-			@tap="_onListItemTapped">
+			@mouseover="${this._onListItemMouseOver}">
 				${this._textForItem(item)}
 			</option>
 		`)}
@@ -417,7 +419,7 @@ class TagPicker extends LitElement {
 			}
 		};
 		console.log('created new tag: ', newTag);
-		this.tags.push(newTag);
+		this.tags = [...this.tags, newTag];
 		console.log('tags after pushing: ', this.tags);
 	}
 
@@ -690,8 +692,10 @@ class TagPicker extends LitElement {
 	}
 
 	_onListItemTapped(e) {
-		const index = this._listItemIndexForEvent(e);
-		const data = this._filteredData[index];
+		console.log('tapped: [', e.target.value, ']');
+		// const index = this._listItemIndexForEvent(e);
+		// const data = this._filteredData[index];
+		const data = e.target.value;
 		// this.dispatchEvent(new CustomEvent('selectize-item-selected', {
 		// 	bubbles: true,
 		// 	composed: true,

@@ -17,18 +17,13 @@ class TagPicker extends LitElement {
 				type: String
 			},
 			allowFreeform: {
-				type: Boolean,
-				value: true
+				type: Boolean
 			},
 			data: {
 				type: Array,
-				value() { return []; },
-				notify: true
 			},
 			inputFocused: {
 				type: Boolean,
-				reflectToAttribute: true,
-				value: false
 			},
 			label: {
 				type: String,
@@ -39,27 +34,23 @@ class TagPicker extends LitElement {
 			},
 			text: {
 				type: String,
-				value: ''
 			},
 			tags: {
 				type: Array,
 			},
 			_activeValueIndex: {
 				type: Number,
-				value: -1,
 				observer: '_activeValueIndexChanged'
 			},
 			_blurHandle: Number,
 			_dropdownIndex: {
 				type: Number,
-				value: -1,
 				observer: '_dropdownIndexChanged'
 			},
 			_dropdownItem: Object,
 			_dropdownOpened: Boolean,
 			_filteredData: {
 				type: Array,
-				value: []
 				// computed: '_computeFilteredData(values, data, _touch)',
 				// observer: '_filteredDataChanged'
 			},
@@ -86,7 +77,6 @@ class TagPicker extends LitElement {
 			},
 			_touch: {
 				type: Boolean,
-				value: false
 			},
 			_uniqueId: {
 				type: String,
@@ -95,7 +85,6 @@ class TagPicker extends LitElement {
 			_valueBlurHandle: Number,
 			_valueFocused: {
 				type: Boolean,
-				value: false
 			}
 		};
 	}
@@ -266,32 +255,21 @@ class TagPicker extends LitElement {
 
 	constructor() {
 		super();
-
-		if (!this.prop1) this.prop1 = 'tag-picker (default value)';
-		// this.tags = [{value: 'one'}, {value: 'two'}, {value: 'three'}];
 		this.tags = [];
 		this.text = '';
-		// this.tags.forEach(v => {
-		// 	v.deleteMe = () => {
-		// 		this._removeSelected(this.tags.indexOf(v));
-		// 	};
-		// 	// note: binding the index instead of creating a new arrow function doesn't work,
-		// 	// because each item's index is captured once and never updated,
-		// 	// which breaks as soon as you have any kind of dynamic list
-		// 	// v.deleteMe = this._removeSelected.bind(this, this.tags.indexOf(v));
-		// });
+		this.data = [];
+		this.inputFocused = false;
+		this._activeValueIndex = -1;
+		this._dropdownIndex = -1;
+		this._touch = false;
+		this._valueFocused = false;
+
 		this._addTag('one');
 		this._addTag('two');
 		this._addTag('three');
 
 		this._filteredData = ['four', 'five', 'six'];
 		this.allowFreeform = true;
-	}
-
-	render2() {
-		return html`
-			<h2>I'm ${this.prop1}, 2.0, hee ho!</h2>
-		`;
 	}
 
 	render() {
@@ -412,11 +390,18 @@ class TagPicker extends LitElement {
 	}
 
 	_addTag(newValue) {
+		if (!newValue || this.tags.findIndex(tag => tag.value === newValue) >= 0) {
+			return;
+		}
 		const newTag = {
 			value: newValue,
 			deleteMe: () => {
 				this._removeSelected(this.tags.indexOf(newTag));
 			}
+			// note: binding the index instead of creating a new arrow function,
+			// i.e. deleteMe: this._removeSelected.bind(this, this.tags.indexOf(v))
+			// doesn't work because each item's index is captured once and never updated,
+			// so once we start adding and removing items, those initially bound indicies would be out of date
 		};
 		console.log('created new tag: ', newTag);
 		this.tags = [...this.tags, newTag];
@@ -426,8 +411,6 @@ class TagPicker extends LitElement {
 	_activeValueIndexChanged(index) {
 		const content = this.shadowroot
 			.querySelector('.content');
-		// const selectedValues = dom(content) // not sure what the equivalent here is
-			// .querySelectorAll('.selectedValue');
 		const selectedValues = this.shadowroot.querySelector(content).querySelectorAll('.selectedContent');
 
 		if (index >= 0 && index < selectedValues.length) {

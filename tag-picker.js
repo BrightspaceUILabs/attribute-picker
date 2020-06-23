@@ -37,14 +37,9 @@ class TagPicker extends LitElement {
 			limit: {
 				type: Number
 			},
-			placeholderText: {
-				type: String,
-				value: ''
-			},
 			text: {
 				type: String,
-				notify: true,
-				observer: '_textChanged'
+				value: ''
 			},
 			values: {
 				type: Array,
@@ -66,8 +61,9 @@ class TagPicker extends LitElement {
 			_dropdownOpened: Boolean,
 			_filteredData: {
 				type: Array,
-				computed: '_computeFilteredData(values, data, _touch)',
-				observer: '_filteredDataChanged'
+				value: []
+				// computed: '_computeFilteredData(values, data, _touch)',
+				// observer: '_filteredDataChanged'
 			},
 			_inputTarget: {
 				type: Object
@@ -274,7 +270,19 @@ class TagPicker extends LitElement {
 		super();
 
 		if (!this.prop1) this.prop1 = 'tag-picker (default value)';
-		this.values = ['one', 'two', 'three'];
+		this.values = [{text: 'one'}, {text: 'two'}, {text: 'three'}];
+		this.text = '';
+		this.values.forEach(v => {
+			v.deleteMe = () => {
+				this._removeSelected(this.values.indexOf(v));
+			};
+			// note: binding the index instead of creating a new arrow function doesn't work,
+			// because each item's index is captured once and never updated,
+			// which breaks as soon as you have any kind of dynamic list
+			// v.deleteMe = this._removeSelected.bind(this, this.values.indexOf(v));
+		});
+
+		this._filteredData = ['four', 'five', 'six'];
 	}
 
 	render2() {
@@ -291,30 +299,30 @@ class TagPicker extends LitElement {
 		${this.values.map((item, index) => html`
 			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
 				${index}, ${this._computeDisplay(item)}
-				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${() => this._removeSelected(index)}}">
+				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
 				</d2l-icon>
 			</div>`)}
 		<!-- </template> -->
 		<!-- <d2l-input bind-value="{{text}}"> -->
 		<!-- class="d2l-body-compact selectize-input"-->
 		<!-- style="style$="[[_inputStyle]]"" -->
-		<!-- <input
-			aria-activedescendant="[[_applyPrefix(_uniqueId, 'item', _dropdownIndex)]]"
-			aria-autocomplete="list"
-			aria-expanded="[[computeAriaBoolean(_dropdownOpened)]]"
-			aria-haspopup="true"
-			aria-owns="[[_applyPrefix(_uniqueId, 'dropdown')]]"
-			class="d2l-input selectize-input"
-			@blur="_blur"
-			@focus="_focus"
-			@keydown="_keydown"
-			@tap="_focus"
-			placeholder="[[placeholderText]]"
-			role="combobox"
-			type="text"
-			value="{{text::change}}">
-		</input> -->
-	</div>
+			<input
+				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
+				aria-autocomplete="list"
+				aria-expanded="${this.computeAriaBoolean(this._dropdownOpened)}"
+				aria-haspopup="true"
+				aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
+				class="d2l-input selectize-input"
+				@blur="${this._blur}"
+				@focus="${this._focus}"
+				@keydown="${this._keydown}"
+				@tap="${this._focus}"
+				@input="${this._textChanged}"
+				role="combobox"
+				type="text"
+				.value="${this.text}">
+			</input>
+		</div>
 	<!-- original implementation for reference-->
 	<!-- <iron-dropdown opened="{{_dropdownOpened}}" focus-target="[[_inputTarget]]" no-animations no-overlap>
 		<ul slot="dropdown-content" id="[[_applyPrefix(_uniqueId, 'dropdown')]]" role="listbox" aria-multiselectable="true" class="dropdown-content list">
@@ -326,25 +334,25 @@ class TagPicker extends LitElement {
 	</iron-dropdown> -->
 	<!-- d2l dropdown style version -->
 
-	<!-- <select class="dropdown-content list" 
-		opened="{{_dropdownOpened}}" 
-		focus-target="[[_inputTarget]]" 
+	<select class="dropdown-content list d2l-input-select" 
+		opened="${this._dropdownOpened}" 
+		focus-target="${this._inputTarget}"
 		no-animations 
 		no-overlap 
 		slot="dropdown-content" 
-		id="[[_applyPrefix(_uniqueId, 'dropdown')]]" 
+		id="${this._applyPrefix(this._uniqueId, 'dropdown')}" 
 		role="listbox" 
 		aria-multiselectable="true">
-		<template is="dom-repeat" items="[[_filteredData]]">
-			<option aria-label="[[_textForItem(item)]]" 
-				aria-selected="[[_computeAriaSelected(_dropdownIndex, _filteredData, item)]]" 
-				class="[[_computeListItemClass(_dropdownIndex, _filteredData, item)]]" 
-				@mouseover="_onListItemMouseOver" 
-				@tap="_onListItemTapped">
-				[[_textForItem(item)]]
+		${this._filteredData.map(item => html`
+			<option aria-label="${this._textForItem(item)}" 
+			aria-selected="${this._computeAriaSelected(this._dropdownIndex, this._filteredData, item)}" 
+			class="${this._computeListItemClass(this._dropdownIndex, this._filteredData, item)}" 
+			@mouseover="_onListItemMouseOver" 
+			@tap="_onListItemTapped">
+				${this._textForItem(item)}
 			</option>
-		</template>
-	</select> -->
+		`)}
+	</select>
 
 	<!-- d2l-dropdown version -->
 	<!-- <d2l-dropdown-button>
@@ -388,7 +396,7 @@ class TagPicker extends LitElement {
 	}
 
 	clearText() {
-		this.set('text', '');
+		this.text = '';
 	}
 
 	focus(e) {
@@ -463,9 +471,9 @@ class TagPicker extends LitElement {
             input.selectionEnd === 0);
 		if (inBounds) {
 			if (this._activeValueIndex > 0) {
-				this.set('_activeValueIndex', this._activeValueIndex - 1);
+				this._activeValueIndex -= 1;
 			} else if (this._activeValueIndex < 0) {
-				this.set('_activeValueIndex', this.values.length - 1);
+				this._activeValueIndex = this.values.length - 1;
 			}
 			kE.preventDefault();
 		}
@@ -484,7 +492,7 @@ class TagPicker extends LitElement {
 				next = -1;
 				input.focus();
 			}
-			this.set('_activeValueIndex', next);
+			this._activeValueIndex = next;
 			kE.preventDefault();
 		}
 	}
@@ -551,14 +559,14 @@ class TagPicker extends LitElement {
 		if (this.allowFreeform) {
 			if (this.text.trim().length > 0) {
 				this.push('values', this.text.trim());
-				this.set('text', '');
+				this.text = '';
 			}
 		} else {
 			if (this._dropdownItem) {
 				this.push('values', this._dropdownItem);
-				this.set('text', '');
-				this.set('_touch', !this._touch);
-				this.set('data', []);
+				this.text = '';
+				this._touch = !this._touch;
+				this.data = [];
 			} else {
 				this._fireAutoComplete();
 			}
@@ -596,15 +604,15 @@ class TagPicker extends LitElement {
 
 	_handleBlur() {
 		this._blurHandle = null;
-		this.set('inputFocused', false);
-		this.set('data', []);
+		this.inputFocused = false;
+		this.data = [];
 		this.shadowroot.querySelector('iron-dropdown').close();
-		this.fire('input-blur');
+		this.dispatchEvent(new CustomEvent('input-blur'));
 	}
 
 	_handleValueBlur() {
 		this._valueBlurHandle = null;
-		this.set('_valueFocused', false);
+		this.valueFocused = false;
 	}
 
 	_handleTap(event) {
@@ -617,16 +625,17 @@ class TagPicker extends LitElement {
 	}
 
 	_blur() {
-		this._blurHandle = this.async(this._handleBlur, 300);
+		// this._blurHandle = this.async(this._handleBlur, 300);
+		this.blurHandle = setTimeout(this._handleBlur, 300);
 	}
 
 	_focus() {
 		if (this._blurHandle) {
 			this.cancelAsync(this._blurHandle);
 		}
-		this.set('inputFocused', true);
-		this.set('_activeValueIndex', -1);
-		this.fire('input-focus');
+		this.inputFocused = true;
+		this._activeValueIndex = -1;
+		this.dispatchEvent(new CustomEvent('input-focus'));
 	}
 
 	_keydown(e) {
@@ -634,7 +643,7 @@ class TagPicker extends LitElement {
 			// if a value is selected, remove that value
 			if (this._activeValueIndex >= 0) {
 				this._removeSelected(this._activeValueIndex);
-				this.set('_activeValueIndex', -1);
+				this._activeValueIndex = -1;
 				e.preventDefault();
 				return;
 			}
@@ -643,7 +652,7 @@ class TagPicker extends LitElement {
 			// select the last value
 			if (e.srcElement.selectionStart === 0 &&
                     e.srcElement.selectionEnd === 0) {
-				this.set('_activeValueIndex', this.values.length - 1);
+				this._activeValueIndex = this.values.length - 1;
 			}
 		} else if (e.keyCode === 13) { // Pressed enter
 			this._onEnterPressed();
@@ -692,18 +701,14 @@ class TagPicker extends LitElement {
 	}
 
 	_removeSelected(e) {
-		console.log('removeSelected called: ', e, this._activeValueIndex);
-		const index = Number.isInteger(e) ? e : (e.model ? e.model.index : 0);
-		// this.splice('values', index, 1);
-		this.values.splice(index, 1); // for testing, don't actually remove anything yet
-		// this.set('data', []);
+		console.log('removeSelected called: ', e);
+		const index = Number.isInteger(e) ? e : (e.target ? e.target.index : 0);
+		this.values.splice(index, 1);
 		this.data = [];
 		if (index === this._activeValueIndex) {
-			// this.set('_activeValueIndex', -1);
 			this._activeValueIndex = -1;
 		} else if (index < this._activeValueIndex) {
 			setTimeout(() => {
-				// this.set('_activeValueIndex', this._activeValueIndex - 1);
 				this._activeValueIndex -= 1;
 			}, 5);
 		}
@@ -724,7 +729,7 @@ class TagPicker extends LitElement {
 	_selectDropdownIndex(index, shouldScroll) {
 		// don't want to scroll on mouseover
 		if (shouldScroll) this._scrollList(index);
-		this.set('_dropdownIndex', index);
+		this._dropdownIndex = index;
 	}
 
 	_selectDropdownItem(index) {
@@ -733,9 +738,9 @@ class TagPicker extends LitElement {
             this._filteredData.length > 0 &&
             index < this._filteredData.length;
 		if (inBounds) {
-			this.set('_dropdownItem', this._filteredData[index]);
+			this._dropdownItem = this._filteredData[index];
 		} else {
-			this.set('_dropdownItem', null);
+			this._dropdownItem = null;
 		}
 	}
 
@@ -748,13 +753,13 @@ class TagPicker extends LitElement {
 
 	_selectValue(e) {
 		if (e.srcElement.tagName.toLowerCase() === 'span') {
-			// this.set('_activeValueIndex', e.model.index);
 			this._activeValueIndex = e.model.index;
 		}
 	}
 
-	_textChanged(text) {
-		this.fire('text-changed', text);
+	_textChanged(event) {
+		this.text = event.target.value;
+		this.dispatchEvent(new CustomEvent('text-changed', {detail: this.text})); // is this needed?
 	}
 
 	_computeUniqueIdPrefix(label) {
@@ -767,21 +772,28 @@ class TagPicker extends LitElement {
 	}
 
 	_valueBlur() {
-		this._valueBlurHandle = this.async(this._handleValueBlur, 100);
+		// this._valueBlurHandle = this.async(this._handleValueBlur, 100);
+		this._valueBlurHandle = this.setTimeout(this._handleValueBlur, 100);
+		// this is an awful variable name, who's idea was this
 	}
 
 	_valueFocus() {
 		if (this._valueBlurHandle) {
-			this.cancelAsync(this._valueBlurHandle);
+			// this.cancelAsync(this._valueBlurHandle);
+			clearTimeout(this._valueBlurHandle);
 			return;
 		}
-		// this.set('_valueFocused', true);
 		this._valueFocused = true;
 	}
 
 	_onValuesChanged() {
 		if (Array.prototype.includes.call(arguments, undefined)) return;
-		this.fire('values-updated');
+		this.dispatchEvent(new CustomEvent('values-updated'));
+	}
+
+	// was a behaviour in manager-view-fra - having it copy & pasted may not be the best thing
+	computeAriaBoolean(booleanValue) {
+		return booleanValue ? 'true' : 'false';
 	}
 }
 customElements.define('d2l-labs-tag-picker', TagPicker);

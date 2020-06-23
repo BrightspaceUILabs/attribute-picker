@@ -18,7 +18,7 @@ class TagPicker extends LitElement {
 			},
 			allowFreeform: {
 				type: Boolean,
-				value: false
+				value: true
 			},
 			data: {
 				type: Array,
@@ -270,19 +270,20 @@ class TagPicker extends LitElement {
 		super();
 
 		if (!this.prop1) this.prop1 = 'tag-picker (default value)';
-		this.values = [{text: 'one'}, {text: 'two'}, {text: 'three'}];
+		this.tags = [{value: 'one'}, {value: 'two'}, {value: 'three'}];
 		this.text = '';
-		this.values.forEach(v => {
+		this.tags.forEach(v => {
 			v.deleteMe = () => {
-				this._removeSelected(this.values.indexOf(v));
+				this._removeSelected(this.tags.indexOf(v));
 			};
 			// note: binding the index instead of creating a new arrow function doesn't work,
 			// because each item's index is captured once and never updated,
 			// which breaks as soon as you have any kind of dynamic list
-			// v.deleteMe = this._removeSelected.bind(this, this.values.indexOf(v));
+			// v.deleteMe = this._removeSelected.bind(this, this.tags.indexOf(v));
 		});
 
 		this._filteredData = ['four', 'five', 'six'];
+		this.allowFreeform = true;
 	}
 
 	render2() {
@@ -296,7 +297,7 @@ class TagPicker extends LitElement {
 		<div class="content js-refocusTarget">
 		<!-- <template is="dom-repeat" items="[[values]]"> -->
 		<!-- replace these divs with tags when we're done with everything else -->
-		${this.values.map((item, index) => html`
+		${this.tags.map((item, index) => html`
 			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
 				${index}, ${this._computeDisplay(item)}
 				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
@@ -318,6 +319,7 @@ class TagPicker extends LitElement {
 				@keydown="${this._keydown}"
 				@tap="${this._focus}"
 				@input="${this._textChanged}"
+				@change="${this._onInputEnterPressed}"
 				role="combobox"
 				type="text"
 				.value="${this.text}">
@@ -407,6 +409,18 @@ class TagPicker extends LitElement {
 		}
 	}
 
+	_addTag(newValue) {
+		const newTag = {
+			value: newValue,
+			deleteMe: () => {
+				this._removeSelected(this.tags.indexOf(newTag));
+			}
+		};
+		console.log('created new tag: ', newTag);
+		this.tags.push(newTag);
+		console.log('tags after pushing: ', this.tags);
+	}
+
 	_activeValueIndexChanged(index) {
 		const content = this.shadowroot
 			.querySelector('.content');
@@ -473,7 +487,7 @@ class TagPicker extends LitElement {
 			if (this._activeValueIndex > 0) {
 				this._activeValueIndex -= 1;
 			} else if (this._activeValueIndex < 0) {
-				this._activeValueIndex = this.values.length - 1;
+				this._activeValueIndex = this.tags.length - 1;
 			}
 			kE.preventDefault();
 		}
@@ -488,7 +502,7 @@ class TagPicker extends LitElement {
 			.querySelector('.selectize-input');
 		if (this._activeValueIndex >= 0) {
 			let next = this._activeValueIndex + 1;
-			if (next >= this.values.length) {
+			if (next >= this.tags.length) {
 				next = -1;
 				input.focus();
 			}
@@ -541,10 +555,11 @@ class TagPicker extends LitElement {
 	}
 
 	_limitReached(increment) {
-		return this.limit && (this.values.length + increment > this.limit);
+		return this.limit && (this.tags.length + increment > this.limit);
 	}
 
-	_enter() {
+	_onInputEnterPressed() {
+		console.log('onInputEnterPressed', this.allowFreeform);
 		if (this._limitReached(1)) {
 			this.dispatchEvent(new CustomEvent('selectize-limit-reached', {
 				bubbles: true,
@@ -558,12 +573,12 @@ class TagPicker extends LitElement {
 
 		if (this.allowFreeform) {
 			if (this.text.trim().length > 0) {
-				this.push('values', this.text.trim());
+				this._addTag(this.text.trim());
 				this.text = '';
 			}
 		} else {
 			if (this._dropdownItem) {
-				this.push('values', this._dropdownItem);
+				this._addTag(this._dropdownItem);
 				this.text = '';
 				this._touch = !this._touch;
 				this.data = [];
@@ -652,10 +667,10 @@ class TagPicker extends LitElement {
 			// select the last value
 			if (e.srcElement.selectionStart === 0 &&
                     e.srcElement.selectionEnd === 0) {
-				this._activeValueIndex = this.values.length - 1;
+				this._activeValueIndex = this.tags.length - 1;
 			}
 		} else if (e.keyCode === 13) { // Pressed enter
-			this._onEnterPressed();
+			// this._onSelectEnterPressed();
 		}
 	}
 
@@ -677,33 +692,36 @@ class TagPicker extends LitElement {
 	_onListItemTapped(e) {
 		const index = this._listItemIndexForEvent(e);
 		const data = this._filteredData[index];
-		this.dispatchEvent(new CustomEvent('selectize-item-selected', {
-			bubbles: true,
-			composed: true,
-			detail: {
-				index,
-				item: data
-			}
-		}));
+		// this.dispatchEvent(new CustomEvent('selectize-item-selected', {
+		// 	bubbles: true,
+		// 	composed: true,
+		// 	detail: {
+		// 		index,
+		// 		item: data
+		// 	}
+		// }));
+		this._addTag(data);
 	}
 
-	_onEnterPressed() {
+	_onSelectEnterPressed() {
+		console.log('_onSelectEnterPressed');
 		const index = this._dropdownIndex;
 		const data = this._filteredData[index];
-		this.dispatchEvent(new CustomEvent('selectize-item-selected', {
-			bubbles: true,
-			composed: true,
-			detail: {
-				index,
-				item: data
-			}
-		}));
+		// this.dispatchEvent(new CustomEvent('selectize-item-selected', {
+		// 	bubbles: true,
+		// 	composed: true,
+		// 	detail: {
+		// 		index,
+		// 		item: data
+		// 	}
+		// }));
+		this._addTag(data);
 	}
 
 	_removeSelected(e) {
 		console.log('removeSelected called: ', e);
 		const index = Number.isInteger(e) ? e : (e.target ? e.target.index : 0);
-		this.values.splice(index, 1);
+		this.tags.splice(index, 1);
 		this.data = [];
 		if (index === this._activeValueIndex) {
 			this._activeValueIndex = -1;

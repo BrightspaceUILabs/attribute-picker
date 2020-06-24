@@ -653,6 +653,7 @@ class TagPicker extends LitElement {
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
 			if (this._activeValueIndex >= 0) {
+				console.log('about to remove (via backspace): ', this._activeValueIndex);
 				this._removeSelected(this._activeValueIndex);
 				this._activeValueIndex = -1;
 				e.preventDefault();
@@ -716,9 +717,8 @@ class TagPicker extends LitElement {
 		this._addTag(data);
 	}
 
-	_removeSelected(e) {
-		console.log('removeSelected called: ', e);
-		const index = Number.isInteger(e) ? e : (e.target ? e.target.index : 0);
+	_removeSelected(index) {
+		console.log('removeSelected called: ', index);
 		this.tags.splice(index, 1);
 		this.data = [];
 		if (index === this._activeValueIndex) {
@@ -762,7 +762,9 @@ class TagPicker extends LitElement {
 
 	_selectedKeydown(e) {
 		if (e.keyCode === 8) {
-			this._removeSelected(e);
+			console.log('removeSelected from selectedKeydown');
+			// this._removeSelected(e);
+			this._removeSelected(this._activeValueIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
 	}

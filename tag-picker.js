@@ -66,7 +66,7 @@ class TagPicker extends LitElement {
 				value() {
 					//const refocusTargets = dom(this.root)
 					// I have no idea if this is equivalent:
-					const refocusTargets = this.shadowroot
+					const refocusTargets = this.shadowRoot
 						.querySelectorAll('.js-refocusTarget');
 					return [this].concat(refocusTargets);
 				}
@@ -326,6 +326,7 @@ class TagPicker extends LitElement {
 		role="listbox" 
 		aria-multiselectable="true"
 		@change="${this._onListItemTapped}">
+		<option disabled selected></option>
 		${this._filteredData.map(item => html`
 			<option aria-label="${this._textForItem(item)}" 
 			aria-selected="${this._computeAriaSelected(this._dropdownIndex, this._filteredData, item)}" 
@@ -374,7 +375,17 @@ class TagPicker extends LitElement {
 	// },
 
 	ready() {
-		this._inputTarget = this.shadowroot.querySelector('input');
+		this._inputTarget = this.shadowRoot.querySelector('input');
+	}
+
+	updated(changedProperties) {
+		super.updated(changedProperties);
+
+		console.log('something got updated: ', changedProperties);
+		if (changedProperties.has('_activeValueIndex')) {
+			console.log('activeValueIndex changed from ', changedProperties.get('_activeValueIndex'), ' to ', this._activeValueIndex);
+			this._activeValueIndexChanged(this._activeValueIndex);
+		}
 	}
 
 	clearText() {
@@ -382,7 +393,7 @@ class TagPicker extends LitElement {
 	}
 
 	focus(e) {
-		const content = this.shadowroot
+		const content = this.shadowRoot
 			.querySelector('.content');
 		if (!e || e.target === content) {
 			this._inputTarget.focus();
@@ -409,10 +420,10 @@ class TagPicker extends LitElement {
 	}
 
 	_activeValueIndexChanged(index) {
-		const content = this.shadowroot
+		const content = this.shadowRoot
 			.querySelector('.content');
-		const selectedValues = this.shadowroot.querySelector(content).querySelectorAll('.selectedContent');
-
+		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue'); // yolo
+		console.log('activeValueIndexChanged: ', index, selectedValues);
 		if (index >= 0 && index < selectedValues.length) {
 			selectedValues[index].focus();
 		}
@@ -463,7 +474,7 @@ class TagPicker extends LitElement {
 		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
 			return;
 
-		const input = this.shadowroot
+		const input = this.shadowRoot
 			.querySelector('.selectize-input');
 		const inBounds = this._activeValueIndex >= 0 ||
             (input.selectionStart === 0 &&
@@ -483,7 +494,7 @@ class TagPicker extends LitElement {
 		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
 			return;
 
-		const input = this.shadowroot
+		const input = this.shadowRoot
 			.querySelector('.selectize-input');
 		if (this._activeValueIndex >= 0) {
 			let next = this._activeValueIndex + 1;
@@ -576,9 +587,9 @@ class TagPicker extends LitElement {
 	_filteredDataChanged(filteredData) {
 		if (filteredData && filteredData.length > 0 && this.inputFocused) {
 			this._selectDropdownIndex(0, true);
-			this.shadowroot.querySelector('iron-dropdown').open();
+			this.shadowRoot.querySelector('iron-dropdown').open();
 		} else {
-			this.shadowroot.querySelector('iron-dropdown').close();
+			this.shadowRoot.querySelector('iron-dropdown').close();
 			this._selectDropdownIndex(-1, true);
 		}
 	}
@@ -606,7 +617,7 @@ class TagPicker extends LitElement {
 		this._blurHandle = null;
 		this.inputFocused = false;
 		this.data = [];
-		this.shadowroot.querySelector('iron-dropdown').close();
+		this.shadowRoot.querySelector('iron-dropdown').close();
 		this.dispatchEvent(new CustomEvent('input-blur'));
 	}
 
@@ -660,11 +671,11 @@ class TagPicker extends LitElement {
 	}
 
 	_labelChanged() {
-		this.shadowroot.querySelector('.selectize-input').setAttribute('aria-label', this.label);
+		this.shadowRoot.querySelector('.selectize-input').setAttribute('aria-label', this.label);
 	}
 
 	_listItemIndexForEvent(e) {
-		const list = this.shadowroot.querySelector('ul');
+		const list = this.shadowRoot.querySelector('ul');
 		const index = Array.from(list.childNodes).indexOf(e.target);
 		return index;
 	}
@@ -720,7 +731,7 @@ class TagPicker extends LitElement {
 	}
 
 	_scrollList(index) {
-		const list = this.shadowroot.querySelector('.list');
+		const list = this.shadowRoot.querySelector('.list');
 		if (index >= 0 && index < list.children.length) {
 			const elem = list.children[index];
 			if (elem.offsetTop < list.scrollTop) {
@@ -752,7 +763,7 @@ class TagPicker extends LitElement {
 	_selectedKeydown(e) {
 		if (e.keyCode === 8) {
 			this._removeSelected(e);
-			this.shadowroot.querySelector('.selectize-input').focus();
+			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
 	}
 
@@ -778,7 +789,7 @@ class TagPicker extends LitElement {
 
 	_valueBlur() {
 		// this._valueBlurHandle = this.async(this._handleValueBlur, 100);
-		this._valueBlurHandle = this.setTimeout(this._handleValueBlur, 100);
+		this._valueBlurHandle = setTimeout(this._handleValueBlur, 100);
 		// this is an awful variable name, who's idea was this
 	}
 

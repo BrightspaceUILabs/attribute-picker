@@ -27,7 +27,6 @@ class TagPicker extends LitElement {
 			},
 			label: {
 				type: String,
-				observer: '_labelChanged'
 			},
 			limit: {
 				type: Number
@@ -386,6 +385,9 @@ class TagPicker extends LitElement {
 			console.log('activeValueIndex changed from ', changedProperties.get('_activeValueIndex'), ' to ', this._activeValueIndex);
 			this._activeValueIndexChanged(this._activeValueIndex);
 		}
+		if (changedProperties.has('label')) {
+			this._labelChanged();
+		}
 	}
 
 	clearText() {
@@ -419,13 +421,10 @@ class TagPicker extends LitElement {
 		console.log('tags after pushing: ', this.tags);
 	}
 
-	_activeValueIndexChanged(index) {
-		const content = this.shadowRoot
-			.querySelector('.content');
+	_activeValueIndexChanged() {
 		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue'); // yolo
-		console.log('activeValueIndexChanged: ', index, selectedValues);
-		if (index >= 0 && index < selectedValues.length) {
-			selectedValues[index].focus();
+		if (this._activeValueIndex >= 0 && this._activeValueIndex < selectedValues.length) {
+			selectedValues[this._activeValueIndex].focus();
 		}
 	}
 

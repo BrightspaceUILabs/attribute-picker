@@ -40,22 +40,26 @@ class TagPicker extends LitElement {
 			_activeValueIndex: {
 				type: Number,
 			},
-			_blurHandle: Number,
+			_blurHandle: {
+				type: Number,
+			},
 			_dropdownIndex: {
 				type: Number,
 			},
-			_dropdownItem: Object,
-			_dropdownOpened: Boolean,
+			_dropdownItem: {
+				type: Object,
+			},
+			_dropdownOpened: {
+				type: Boolean,
+			},
 			_filteredData: {
 				type: Array,
-				// computed: '_computeFilteredData(values, data, _touch)',
 			},
 			_inputTarget: {
 				type: Object
 			},
 			_inputStyle: {
 				type: String,
-				computed: '_computeInputStyle(text)'
 			},
 			_refocusTargets: {
 				type: Array,
@@ -69,14 +73,12 @@ class TagPicker extends LitElement {
 			},
 			_templateStore: {
 				type: Object,
-				value() { return {}; }
 			},
 			_touch: {
 				type: Boolean,
 			},
 			_uniqueId: {
 				type: String,
-				computed: '_computeUniqueIdPrefix(label)'
 			},
 			_valueBlurHandle: Number,
 			_valueFocused: {
@@ -259,6 +261,7 @@ class TagPicker extends LitElement {
 		this._dropdownIndex = -1;
 		this._touch = false;
 		this._valueFocused = false;
+		this._templateStore = {};
 
 		this._addTag('one');
 		this._addTag('two');
@@ -377,7 +380,7 @@ class TagPicker extends LitElement {
 	updated(changedProperties) {
 		super.updated(changedProperties);
 
-		console.log('something got updated: ', changedProperties);
+		console.log('something got updated: ', Array.from(changedProperties.keys()));
 		if (changedProperties.has('_activeValueIndex')) {
 			console.log('activeValueIndex changed from ', changedProperties.get('_activeValueIndex'), ' to ', this._activeValueIndex);
 			this._activeValueIndexChanged(this._activeValueIndex);
@@ -391,6 +394,22 @@ class TagPicker extends LitElement {
 		if (changedProperties.has('_filteredData')) {
 			this._filteredDataChanged();
 		}
+	}
+
+	get _filteredData() {
+		if (Array.prototype.includes.call(arguments, undefined)) return [];
+		if (!this.data || !this.data.filter) return [];
+
+		return this.data.filter((item) => {
+			return this.tags.findIndex((value) => {
+				return ((value.value && value.value === item.value)
+                    || (value === item));
+			}) < 0;
+		});
+	}
+
+	get _uniqueId() {
+		return this.label.toLowerCase().replace(/[\W]/g, '');
 	}
 
 	clearText() {
@@ -419,9 +438,7 @@ class TagPicker extends LitElement {
 			// doesn't work because each item's index is captured once and never updated,
 			// so once we start adding and removing items, those initially bound indicies would be out of date
 		};
-		console.log('created new tag: ', newTag);
 		this.tags = [...this.tags, newTag];
-		console.log('tags after pushing: ', this.tags);
 	}
 
 	_activeValueIndexChanged() {
@@ -530,18 +547,6 @@ class TagPicker extends LitElement {
 		return item.text || item.value || item;
 	}
 
-	_computeFilteredData(values, data) {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		if (!data || !data.filter) return;
-
-		return data.filter((item) => {
-			return values.findIndex((value) => {
-				return ((value.value && value.value === item.value)
-                    || (value === item));
-			}) < 0;
-		});
-	}
-
 	_computeInputStyle(text) {
 		if (Array.prototype.includes.call(arguments, undefined)) return;
 		const length = text && text.length || 0;
@@ -587,6 +592,7 @@ class TagPicker extends LitElement {
 	}
 
 	_filteredDataChanged() {
+		console.log('filteredDataChanged');
 		if (this._filteredData && this._filteredData.length > 0 && this.inputFocused) {
 			this._selectDropdownIndex(0, true);
 			this.shadowRoot.querySelector('iron-dropdown').open();
@@ -616,6 +622,7 @@ class TagPicker extends LitElement {
 	}
 
 	_handleBlur() {
+		console.log('handleBlur');
 		this._blurHandle = null;
 		this.inputFocused = false;
 		this.data = [];
@@ -780,11 +787,6 @@ class TagPicker extends LitElement {
 	_textChanged(event) {
 		this.text = event.target.value;
 		this.dispatchEvent(new CustomEvent('text-changed', {detail: this.text})); // is this needed?
-	}
-
-	_computeUniqueIdPrefix(label) {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		return label.toLowerCase().replace(/[\W]/g, '');
 	}
 
 	_textForItem(item) {

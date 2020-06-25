@@ -39,19 +39,16 @@ class TagPicker extends LitElement {
 			},
 			_activeValueIndex: {
 				type: Number,
-				observer: '_activeValueIndexChanged'
 			},
 			_blurHandle: Number,
 			_dropdownIndex: {
 				type: Number,
-				observer: '_dropdownIndexChanged'
 			},
 			_dropdownItem: Object,
 			_dropdownOpened: Boolean,
 			_filteredData: {
 				type: Array,
 				// computed: '_computeFilteredData(values, data, _touch)',
-				// observer: '_filteredDataChanged'
 			},
 			_inputTarget: {
 				type: Object
@@ -388,6 +385,12 @@ class TagPicker extends LitElement {
 		if (changedProperties.has('label')) {
 			this._labelChanged();
 		}
+		if (changedProperties.has('_dropdownIndex')) {
+			this._dropdownIndexChanged();
+		}
+		if (changedProperties.has('_filteredData')) {
+			this._filteredDataChanged();
+		}
 	}
 
 	clearText() {
@@ -422,7 +425,7 @@ class TagPicker extends LitElement {
 	}
 
 	_activeValueIndexChanged() {
-		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue'); // yolo
+		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue');
 		if (this._activeValueIndex >= 0 && this._activeValueIndex < selectedValues.length) {
 			selectedValues[this._activeValueIndex].focus();
 		}
@@ -545,8 +548,8 @@ class TagPicker extends LitElement {
 		return `width:${10 * (length + 1)}px;`;
 	}
 
-	_dropdownIndexChanged(index) {
-		this._selectDropdownItem(index);
+	_dropdownIndexChanged() {
+		this._selectDropdownItem(this.dropdownIndex);
 	}
 
 	_limitReached(increment) {
@@ -583,8 +586,8 @@ class TagPicker extends LitElement {
 		}
 	}
 
-	_filteredDataChanged(filteredData) {
-		if (filteredData && filteredData.length > 0 && this.inputFocused) {
+	_filteredDataChanged() {
+		if (this._filteredData && this._filteredData.length > 0 && this.inputFocused) {
 			this._selectDropdownIndex(0, true);
 			this.shadowRoot.querySelector('iron-dropdown').open();
 		} else {

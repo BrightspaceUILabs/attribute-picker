@@ -52,7 +52,7 @@ class TagPicker extends LitElement {
 			_dropdownOpened: {
 				type: Boolean,
 			},
-			_filteredData: {
+			filteredData: {
 				type: Array,
 			},
 			_inputTarget: {
@@ -271,6 +271,30 @@ class TagPicker extends LitElement {
 		this.allowFreeform = true;
 	}
 
+	get filteredData() {
+		if (Array.prototype.includes.call(arguments, undefined)) return [];
+		if (!this.data || !this.data.filter) return [];
+
+		return this.data.filter((item) => {
+			return this.tags.findIndex((value) => {
+				return ((value.value && value.value === item.value)
+                    || (value === item));
+			}) < 0;
+		});
+	}
+
+	set filteredData(data) {
+		this._filteredData = data;
+	}
+
+	get uniqueId() {
+		return this.label.toLowerCase().replace(/[\W]/g, '');
+	}
+
+	set uniqueId(newId) {
+		this._uniqueId = newId;
+	}
+
 	render() {
 		return html`
 		<div class="content js-refocusTarget">
@@ -394,22 +418,6 @@ class TagPicker extends LitElement {
 		if (changedProperties.has('_filteredData')) {
 			this._filteredDataChanged();
 		}
-	}
-
-	get _filteredData() {
-		if (Array.prototype.includes.call(arguments, undefined)) return [];
-		if (!this.data || !this.data.filter) return [];
-
-		return this.data.filter((item) => {
-			return this.tags.findIndex((value) => {
-				return ((value.value && value.value === item.value)
-                    || (value === item));
-			}) < 0;
-		});
-	}
-
-	get _uniqueId() {
-		return this.label.toLowerCase().replace(/[\W]/g, '');
 	}
 
 	clearText() {

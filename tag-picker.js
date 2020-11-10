@@ -792,12 +792,21 @@ class TagPicker extends LitElement {
 			this._removeSelected(this._activeValueIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
-		if (e.keyCode === 37) { // Pressed left arrow
+		else if (e.keyCode === 37) { // left arrow
 			console.log('pressed left with active value index: ', this._activeValueIndex);
 			if (this._activeValueIndex > 0 && this._activeValueIndex < this.tags.length){
 				this._activeValueIndex -= 1;
 			} else {
 				this._activeValueIndex = this.tags.length - 1;
+			}
+		}
+		else if (e.keyCode === 39) { // right arrow
+			console.log('pressed left with active value index: ', this._activeValueIndex);
+			if (this._activeValueIndex >= 0 && this._activeValueIndex < this.tags.length - 1){
+				this._activeValueIndex += 1;
+			} else {
+				this._activeValueIndex = -1;
+				this.shadowRoot.querySelector('.selectize-input').focus();
 			}
 		}
 	}

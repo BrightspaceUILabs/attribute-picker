@@ -497,22 +497,27 @@ class TagPicker extends LitElement {
 	}
 
 	_leftArrow(e) {
-		const kE = e.detail.keyboardEvent;
-		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
-			return;
+		// const kE = e.detail.keyboardEvent;
+		// if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
+		// 	return;
 
-		const input = this.shadowRoot
-			.querySelector('.selectize-input');
-		const inBounds = this._activeValueIndex >= 0 ||
-            (input.selectionStart === 0 &&
-            input.selectionEnd === 0);
-		if (inBounds) {
-			if (this._activeValueIndex > 0) {
-				this._activeValueIndex -= 1;
-			} else if (this._activeValueIndex < 0) {
-				this._activeValueIndex = this.tags.length - 1;
-			}
-			kE.preventDefault();
+		// const input = this.shadowRoot
+		// 	.querySelector('.selectize-input');
+		// const inBounds = this._activeValueIndex >= 0 ||
+        //     (input.selectionStart === 0 &&
+        //     input.selectionEnd === 0);
+		// if (inBounds) {
+		// 	if (this._activeValueIndex > 0) {
+		// 		this._activeValueIndex -= 1;
+		// 	} else if (this._activeValueIndex < 0) {
+		// 		this._activeValueIndex = this.tags.length - 1;
+		// 	}
+		// 	kE.preventDefault();
+		// }
+		console.log(e.srcElement);
+		if (e.srcElement.selectionStart === 0 &&
+			e.srcElement.selectionEnd === 0) {
+			this._activeValueIndex = this.tags.length - 1;
 		}
 	}
 
@@ -634,7 +639,7 @@ class TagPicker extends LitElement {
 		this._blurHandle = null;
 		this.inputFocused = false;
 		this.data = [];
-		this.shadowRoot.querySelector('iron-dropdown').close();
+		// this.shadowRoot.querySelector('iron-dropdown').close();
 		this.dispatchEvent(new CustomEvent('input-blur'));
 	}
 
@@ -667,6 +672,7 @@ class TagPicker extends LitElement {
 	}
 
 	_keydown(e) {
+		console.log('keydown: ', e.keyCode);
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
 			if (this._activeValueIndex >= 0) {
@@ -685,6 +691,9 @@ class TagPicker extends LitElement {
 			}
 		} else if (e.keyCode === 13) { // Pressed enter
 			// this._onSelectEnterPressed();
+		} else if (e.keyCode === 37) { // Pressed left arrow
+			console.log('pressed left with active value index: ', this._activeValueIndex);
+			this._activeValueIndex = this.tags.length - 1;
 		}
 	}
 
@@ -780,9 +789,16 @@ class TagPicker extends LitElement {
 	_selectedKeydown(e) {
 		if (e.keyCode === 8) {
 			console.log('removeSelected from selectedKeydown');
-			// this._removeSelected(e);
 			this._removeSelected(this._activeValueIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
+		}
+		if (e.keyCode === 37) { // Pressed left arrow
+			console.log('pressed left with active value index: ', this._activeValueIndex);
+			if (this._activeValueIndex > 0 && this._activeValueIndex < this.tags.length){
+				this._activeValueIndex -= 1;
+			} else {
+				this._activeValueIndex = this.tags.length - 1;
+			}
 		}
 	}
 

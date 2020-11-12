@@ -1,8 +1,12 @@
 import '@brightspace-ui/core/components/icons/icon.js';
 import '@brightspace-ui/core/components/colors/colors.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
+import '@brightspace-ui/core/components/dropdown/dropdown.js';
+import '@brightspace-ui/core/components/dropdown/dropdown-content.js';
 import '@brightspace-ui/core/components/inputs/input-styles.js';
 import '@brightspace-ui/core/components/inputs/input-select-styles.js';
+import '@brightspace-ui/core/components/menu/menu.js';
+import '@brightspace-ui/core/components/menu/menu-item.js';
 // import '@polymer/iron-a11y-keys/iron-a11y-keys.js';
 // import '@polymer/iron-input/iron-input.js';
 // import '../behavior/localize-behavior.js';
@@ -21,6 +25,9 @@ class TagPicker extends LitElement {
 			},
 			data: {
 				type: Array,
+			},
+			hideDropdown: {
+				type: Boolean,
 			},
 			inputFocused: {
 				type: Boolean,
@@ -145,6 +152,12 @@ class TagPicker extends LitElement {
 			width: 0;
 			height: 0;
 		}
+		:host([hidden]) {
+			display: none;
+		}
+		d2l-menu[hidden] {
+			display: none;
+		}
 		input[type=text]:hover,
 		input[type=text]:focus {
 			padding: 0 !important;
@@ -256,6 +269,7 @@ class TagPicker extends LitElement {
 		this.tags = [];
 		this.text = '';
 		this.data = [];
+		this.hideDropdown = true;
 		this.inputFocused = false;
 		this._activeValueIndex = -1;
 		this._dropdownIndex = -1;
@@ -298,7 +312,6 @@ class TagPicker extends LitElement {
 	render() {
 		return html`
 		<div class="content js-refocusTarget">
-		<!-- <template is="dom-repeat" items="[[values]]"> -->
 		<!-- replace these divs with tags when we're done with everything else -->
 		${this.tags.map((item) => html`
 			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
@@ -306,10 +319,6 @@ class TagPicker extends LitElement {
 				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
 				</d2l-icon>
 			</div>`)}
-		<!-- </template> -->
-		<!-- <d2l-input bind-value="{{text}}"> -->
-		<!-- class="d2l-body-compact selectize-input"-->
-		<!-- style="style$="[[_inputStyle]]"" -->
 			<input
 				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
 				aria-autocomplete="list"
@@ -326,7 +335,7 @@ class TagPicker extends LitElement {
 				role="combobox"
 				type="text"
 				.value="${this.text}">
-			</input>
+				</input>
 		</div>
 	<!-- original implementation for reference-->
 	<!-- <iron-dropdown opened="{{_dropdownOpened}}" focus-target="[[_inputTarget]]" no-animations no-overlap>
@@ -339,7 +348,7 @@ class TagPicker extends LitElement {
 	</iron-dropdown> -->
 	<!-- d2l dropdown style version -->
 
-	<select class="dropdown-content list d2l-input-select" 
+	<!-- <select class="dropdown-content list d2l-input-select" 
 		opened="${this._dropdownOpened}" 
 		focus-target="${this._inputTarget}"
 		no-animations 
@@ -358,44 +367,23 @@ class TagPicker extends LitElement {
 				${this._textForItem(item)}
 			</option>
 		`)}
-	</select>
+	</select> -->
 
-	<!-- d2l-dropdown version -->
-	<!-- <d2l-dropdown-button>
-		<d2l-dropdown-menu 
-			opened="{{_dropdownOpened}}" 
-			focus-target="[[_inputTarget]]" 
-			no-animations 
-			no-overlap>
-			<d2l-menu 
-				class="dropdown-content list"
-				slot="dropdown-content" 
-				id="[[_applyPrefix(_uniqueId, 'dropdown')]]" 
-				role="listbox" 
-				aria-multiselectable="true">
-				<template is="dom-repeat" items="[[_filteredData]]">
-					<d2l-menu-item 
-						aria-label$="[[_textForItem(item)]]" 
-						aria-selected$="[[_computeAriaSelected(_dropdownIndex, _filteredData, item)]]" 
-						class$="[[_computeListItemClass(_dropdownIndex, _filteredData, item)]]" 
-						on-mouseover="_onListItemMouseOver" 
-						on-tap="_onListItemTapped">
-						[[_textForItem(item)]]
-					</d2l-menu-item>
-				</template>
-			</d2l-menu>
-		</d2l-dropdown-menu>
-	</d2l-dropdown-button> -->
+	<!--
+		idea:
+		* show/hide menu based on boolean
+		* up/down arrows modify focus
+		* enter/escape hide the menu and take away focus
+		* probably very fiddly
+	-->
+
+		<d2l-menu label="Menu Options" ?hidden="${this.hideDropdown}">
+			${this._filteredData.map(item => html`
+				<d2l-menu-item text="${item}"></d2l-menu-item>
+			`)}
+		</d2l-menu>
 		`;
 	}
-
-	// observers: [
-	// 	'_onValuesChanged(values.splices)'
-	// ],
-
-	// listeners: {
-	// 	'tap': '_handleTap'
-	// },
 
 	ready() {
 		this._inputTarget = this.shadowRoot.querySelector('input');
@@ -496,49 +484,6 @@ class TagPicker extends LitElement {
 		kE.preventDefault();
 	}
 
-	_leftArrow(e) {
-		// const kE = e.detail.keyboardEvent;
-		// if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
-		// 	return;
-
-		// const input = this.shadowRoot
-		// 	.querySelector('.selectize-input');
-		// const inBounds = this._activeValueIndex >= 0 ||
-        //     (input.selectionStart === 0 &&
-        //     input.selectionEnd === 0);
-		// if (inBounds) {
-		// 	if (this._activeValueIndex > 0) {
-		// 		this._activeValueIndex -= 1;
-		// 	} else if (this._activeValueIndex < 0) {
-		// 		this._activeValueIndex = this.tags.length - 1;
-		// 	}
-		// 	kE.preventDefault();
-		// }
-		console.log(e.srcElement);
-		if (e.srcElement.selectionStart === 0 &&
-			e.srcElement.selectionEnd === 0) {
-			this._activeValueIndex = this.tags.length - 1;
-		}
-	}
-
-	_rightArrow(e) {
-		const kE = e.detail.keyboardEvent;
-		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
-			return;
-
-		const input = this.shadowRoot
-			.querySelector('.selectize-input');
-		if (this._activeValueIndex >= 0) {
-			let next = this._activeValueIndex + 1;
-			if (next >= this.tags.length) {
-				next = -1;
-				input.focus();
-			}
-			this._activeValueIndex = next;
-			kE.preventDefault();
-		}
-	}
-
 	_computeAriaSelected(dropdownIndex, filteredData, item) {
 		if (Array.prototype.includes.call(arguments, undefined)) return;
 		const index = filteredData.indexOf(item);
@@ -608,9 +553,9 @@ class TagPicker extends LitElement {
 		console.log('filteredDataChanged');
 		if (this._filteredData && this._filteredData.length > 0 && this.inputFocused) {
 			this._selectDropdownIndex(0, true);
-			this.shadowRoot.querySelector('iron-dropdown').open();
+			// this.shadowRoot.querySelector('iron-dropdown').open();
 		} else {
-			this.shadowRoot.querySelector('iron-dropdown').close();
+			// this.shadowRoot.querySelector('iron-dropdown').close();
 			this._selectDropdownIndex(-1, true);
 		}
 	}
@@ -658,7 +603,6 @@ class TagPicker extends LitElement {
 	}
 
 	_blur() {
-		// this._blurHandle = this.async(this._handleBlur, 300);
 		this.blurHandle = setTimeout(this._handleBlur, 300);
 	}
 
@@ -689,11 +633,46 @@ class TagPicker extends LitElement {
                     e.srcElement.selectionEnd === 0) {
 				this._activeValueIndex = this.tags.length - 1;
 			}
-		} else if (e.keyCode === 13) { // Pressed enter
+		} else if (e.keyCode === 13) { // enter
 			// this._onSelectEnterPressed();
-		} else if (e.keyCode === 37) { // Pressed left arrow
+		} else if (e.keyCode === 37) { // left arrow
 			console.log('pressed left with active value index: ', this._activeValueIndex);
 			this._activeValueIndex = this.tags.length - 1;
+		} else if (e.keyCode === 40) { // down arrow
+			this.hideDropdown = false;
+			this._dropdownIndex += 1;
+			this._dropdownIndex = this._dropdownIndex % this._filteredData.length;
+			const items = this.shadowRoot.querySelectorAll('d2l-menu-item');
+			console.log('items: ', items);
+			items[this._dropdownIndex].focus();
+			// console.log('updating this: ', this.hideDropdown);
+			// this.requestUpdate();
+
+		}
+	}
+
+	_selectedKeydown(e) {
+		if (e.keyCode === 8) {
+			console.log('removeSelected from selectedKeydown');
+			this._removeSelected(this._activeValueIndex);
+			this.shadowRoot.querySelector('.selectize-input').focus();
+		}
+		else if (e.keyCode === 37) { // left arrow
+			console.log('pressed left with active value index: ', this._activeValueIndex);
+			if (this._activeValueIndex > 0 && this._activeValueIndex < this.tags.length) {
+				this._activeValueIndex -= 1;
+			} else {
+				this._activeValueIndex = this.tags.length - 1;
+			}
+		}
+		else if (e.keyCode === 39) { // right arrow
+			console.log('pressed left with active value index: ', this._activeValueIndex);
+			if (this._activeValueIndex >= 0 && this._activeValueIndex < this.tags.length - 1) {
+				this._activeValueIndex += 1;
+			} else {
+				this._activeValueIndex = -1;
+				this.shadowRoot.querySelector('.selectize-input').focus();
+			}
 		}
 	}
 
@@ -783,31 +762,6 @@ class TagPicker extends LitElement {
 			this._dropdownItem = this._filteredData[index];
 		} else {
 			this._dropdownItem = null;
-		}
-	}
-
-	_selectedKeydown(e) {
-		if (e.keyCode === 8) {
-			console.log('removeSelected from selectedKeydown');
-			this._removeSelected(this._activeValueIndex);
-			this.shadowRoot.querySelector('.selectize-input').focus();
-		}
-		else if (e.keyCode === 37) { // left arrow
-			console.log('pressed left with active value index: ', this._activeValueIndex);
-			if (this._activeValueIndex > 0 && this._activeValueIndex < this.tags.length){
-				this._activeValueIndex -= 1;
-			} else {
-				this._activeValueIndex = this.tags.length - 1;
-			}
-		}
-		else if (e.keyCode === 39) { // right arrow
-			console.log('pressed left with active value index: ', this._activeValueIndex);
-			if (this._activeValueIndex >= 0 && this._activeValueIndex < this.tags.length - 1){
-				this._activeValueIndex += 1;
-			} else {
-				this._activeValueIndex = -1;
-				this.shadowRoot.querySelector('.selectize-input').focus();
-			}
 		}
 	}
 

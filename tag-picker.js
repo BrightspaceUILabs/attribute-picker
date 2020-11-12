@@ -379,7 +379,7 @@ class TagPicker extends LitElement {
 
 		<d2l-menu label="Menu Options" ?hidden="${this.hideDropdown}">
 			${this._filteredData.map(item => html`
-				<d2l-menu-item text="${item}"></d2l-menu-item>
+				<d2l-menu-item text="${item}" @keydown="${this._keydown}"></d2l-menu-item>
 			`)}
 		</d2l-menu>
 		`;
@@ -633,21 +633,28 @@ class TagPicker extends LitElement {
                     e.srcElement.selectionEnd === 0) {
 				this._activeValueIndex = this.tags.length - 1;
 			}
-		} else if (e.keyCode === 13) { // enter
-			// this._onSelectEnterPressed();
 		} else if (e.keyCode === 37) { // left arrow
 			console.log('pressed left with active value index: ', this._activeValueIndex);
 			this._activeValueIndex = this.tags.length - 1;
 		} else if (e.keyCode === 40) { // down arrow
-			this.hideDropdown = false;
-			this._dropdownIndex += 1;
-			this._dropdownIndex = this._dropdownIndex % this._filteredData.length;
-			const items = this.shadowRoot.querySelectorAll('d2l-menu-item');
-			console.log('items: ', items);
-			items[this._dropdownIndex].focus();
-			// console.log('updating this: ', this.hideDropdown);
-			// this.requestUpdate();
-
+			if (this.hideDropdown) {
+				this.hideDropdown = false;
+				this._dropdownIndex = 0;
+			} else {
+				this._dropdownIndex = this._dropdownIndex + 1 % this._filteredData.length;
+			}
+			setTimeout(() => {
+				const items = this.shadowRoot.querySelectorAll('d2l-menu-item');
+				console.log('items: ', items);
+				items[this._dropdownIndex].focus();
+			});
+		} else if (e.keyCode === 13) {
+			if (this._dropdownIndex >= 0 && this._dropdownIndex < this._filteredData.length) {
+				console.log('pressed enter');
+				this._addTag(this._filteredData[this._dropdownIndex]);
+				this._filteredData.splice(this._dropdownIndex, 1);
+				this._dropdownIndex--;
+			}
 		}
 	}
 

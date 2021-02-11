@@ -3,8 +3,7 @@ import '@brightspace-ui/core/components/colors/colors.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
 import '@brightspace-ui/core/components/dropdown/dropdown.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-content.js';
-import '@brightspace-ui/core/components/inputs/input-styles.js';
-import '@brightspace-ui/core/components/inputs/input-select-styles.js';
+import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
 import '@brightspace-ui/core/components/menu/menu.js';
 import '@brightspace-ui/core/components/menu/menu-item.js';
 // import '@polymer/iron-a11y-keys/iron-a11y-keys.js';
@@ -95,7 +94,7 @@ class TagPicker extends LitElement {
 	}
 
 	static get styles() {
-		return css`
+		return [inputStyles, css`
 		:host {
 			border-radius: 6px;
 			border-style: solid;
@@ -253,6 +252,7 @@ class TagPicker extends LitElement {
 			padding: 0px;
 			line-height: 1.4rem;
 			flex-grow: 1;
+			min-height: 0rem; /*Override d2l-input styles*/
 		}
 		.content {
 			display: flex;
@@ -261,7 +261,7 @@ class TagPicker extends LitElement {
 			width: 100%;
 			margin-top: -1px;
 		}
-		`;
+		`];
 	}
 
 	constructor() {
@@ -320,6 +320,7 @@ class TagPicker extends LitElement {
 				</d2l-icon>
 			</div>`)}
 			<input
+				aria-label="${this.ariaLabel}"
 				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
 				aria-autocomplete="list"
 				aria-expanded="${this.computeAriaBoolean(this._dropdownOpened)}"
@@ -337,45 +338,6 @@ class TagPicker extends LitElement {
 				.value="${this.text}">
 				</input>
 		</div>
-	<!-- original implementation for reference-->
-	<!-- <iron-dropdown opened="{{_dropdownOpened}}" focus-target="[[_inputTarget]]" no-animations no-overlap>
-		<ul slot="dropdown-content" id="[[_applyPrefix(_uniqueId, 'dropdown')]]" role="listbox" aria-multiselectable="true" class="dropdown-content list">
-			<template is="dom-repeat" items="[[_filteredData]]">
-				<li aria-label$="[[_textForItem(item)]]" aria-selected$="[[_computeAriaSelected(_dropdownIndex, _filteredData, item)]]" class$="[[_computeListItemClass(_dropdownIndex, _filteredData, item)]]" on-mouseover="_onListItemMouseOver" on-tap="_onListItemTapped">[[_textForItem(item)]]
-				</li>
-			</template>
-		</ul>
-	</iron-dropdown> -->
-	<!-- d2l dropdown style version -->
-
-	<!-- <select class="dropdown-content list d2l-input-select" 
-		opened="${this._dropdownOpened}" 
-		focus-target="${this._inputTarget}"
-		no-animations 
-		no-overlap 
-		slot="dropdown-content" 
-		id="${this._applyPrefix(this._uniqueId, 'dropdown')}" 
-		role="listbox" 
-		aria-multiselectable="true"
-		@change="${this._onListItemTapped}">
-		<option disabled selected></option>
-		${this._filteredData.map(item => html`
-			<option aria-label="${this._textForItem(item)}" 
-			aria-selected="${this._computeAriaSelected(this._dropdownIndex, this._filteredData, item)}" 
-			class="${this._computeListItemClass(this._dropdownIndex, this._filteredData, item)}" 
-			@mouseover="${this._onListItemMouseOver}">
-				${this._textForItem(item)}
-			</option>
-		`)}
-	</select> -->
-
-	<!--
-		idea:
-		* show/hide menu based on boolean
-		* up/down arrows modify focus
-		* enter/escape hide the menu and take away focus
-		* probably very fiddly
-	-->
 
 		<d2l-menu label="Menu Options" ?hidden="${this.hideDropdown}">
 			${this._filteredData.map(item => html`

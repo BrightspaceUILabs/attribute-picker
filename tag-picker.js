@@ -16,34 +16,43 @@ class TagPicker extends LitElement {
 
 	static get properties() {
 		return {
-			prop1: {
-				type: String
-			},
-			allowFreeform: {
+			allowFreeform: { //TODO identify
 				type: Boolean
 			},
-			data: {
+			data: {			//TODO indentify
 				type: Array,
 			},
+			/*
+			* When true, the autocomplete dropdown will not be displayed to the user.
+			*/
 			hideDropdown: {
-				type: Boolean,
-			},
-			inputFocused: {
 				type: Boolean,
 			},
 			label: {
 				type: String,
 			},
+			/*
+			* The maximum number of tags permitted.
+			*/
 			limit: {
 				type: Number
 			},
+			/*
+			* The inner text of the input.
+			*/
 			text: {
 				type: String,
 			},
+			/*
+			An array of strings representing the attributes currently selected in the picker.
+			*/
 			tags: {
 				type: Array,
 			},
-			_activeValueIndex: {
+			/*
+			* Represents the index of the currently focused tag. If no tag is focused, equals -1.
+			*/
+			_activeTagIndex: {
 				type: Number,
 			},
 			_blurHandle: {
@@ -61,8 +70,8 @@ class TagPicker extends LitElement {
 			filteredData: {
 				type: Array,
 			},
-			_inputTarget: {
-				type: Object
+			_inputFocused: {
+				type: Boolean,
 			},
 			_inputStyle: {
 				type: String,
@@ -270,17 +279,12 @@ class TagPicker extends LitElement {
 		this.text = '';
 		this.data = [];
 		this.hideDropdown = true;
-		this.inputFocused = false;
-		this._activeValueIndex = -1;
+		this._inputFocused = false;
+		this._activeTagIndex = -1;
 		this._dropdownIndex = -1;
 		this._touch = false;
 		this._valueFocused = false;
 		this._templateStore = {};
-
-		this._addTag('one');
-		this._addTag('two');
-		this._addTag('three');
-
 		this._filteredData = ['four', 'five', 'six'];
 		this.allowFreeform = true;
 	}
@@ -312,11 +316,11 @@ class TagPicker extends LitElement {
 	render() {
 		return html`
 		<div class="content js-refocusTarget">
-		<!-- replace these divs with tags when we're done with everything else -->
+
 		${this.tags.map((item) => html`
 			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
 				${this._computeDisplay(item)}
-				<d2l-icon class="${(this.inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
+				<d2l-icon class="${(this._inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
 				</d2l-icon>
 			</div>`)}
 			<input
@@ -336,7 +340,7 @@ class TagPicker extends LitElement {
 				role="combobox"
 				type="text"
 				.value="${this.text}">
-				</input>
+			</input>
 		</div>
 
 		<d2l-menu label="Menu Options" ?hidden="${this.hideDropdown}">
@@ -347,17 +351,13 @@ class TagPicker extends LitElement {
 		`;
 	}
 
-	ready() {
-		this._inputTarget = this.shadowRoot.querySelector('input');
-	}
-
 	updated(changedProperties) {
 		super.updated(changedProperties);
 
 		console.log('something got updated: ', Array.from(changedProperties.keys()));
-		if (changedProperties.has('_activeValueIndex')) {
-			console.log('activeValueIndex changed from ', changedProperties.get('_activeValueIndex'), ' to ', this._activeValueIndex);
-			this._activeValueIndexChanged(this._activeValueIndex);
+		if (changedProperties.has('_activeTagIndex')) {
+			console.log('activeValueIndex changed from ', changedProperties.get('_activeTagIndex'), ' to ', this._activeTagIndex);
+			this._activeTagIndexChanged(this._activeTagIndex);
 		}
 		if (changedProperties.has('label')) {
 			this._labelChanged();
@@ -378,7 +378,7 @@ class TagPicker extends LitElement {
 		const content = this.shadowRoot
 			.querySelector('.content');
 		if (!e || e.target === content) {
-			this._inputTarget.focus();
+			this.shadowRoot.querySelector('input').focus();
 		}
 	}
 
@@ -399,10 +399,10 @@ class TagPicker extends LitElement {
 		this.tags = [...this.tags, newTag];
 	}
 
-	_activeValueIndexChanged() {
+	_activeTagIndexChanged() {
 		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue');
-		if (this._activeValueIndex >= 0 && this._activeValueIndex < selectedValues.length) {
-			selectedValues[this._activeValueIndex].focus();
+		if (this._activeTagIndex >= 0 && this._activeTagIndex < selectedValues.length) {
+			selectedValues[this._activeTagIndex].focus();
 		}
 	}
 
@@ -413,6 +413,7 @@ class TagPicker extends LitElement {
 	}
 
 	_upArrow(e) {
+		console.log("hi");
 		const kE = e.detail.keyboardEvent;
 		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
 			return;
@@ -513,7 +514,7 @@ class TagPicker extends LitElement {
 
 	_filteredDataChanged() {
 		console.log('filteredDataChanged');
-		if (this._filteredData && this._filteredData.length > 0 && this.inputFocused) {
+		if (this._filteredData && this._filteredData.length > 0 && this._inputFocused) {
 			this._selectDropdownIndex(0, true);
 			// this.shadowRoot.querySelector('iron-dropdown').open();
 		} else {
@@ -544,9 +545,8 @@ class TagPicker extends LitElement {
 	_handleBlur() {
 		console.log('handleBlur');
 		this._blurHandle = null;
-		this.inputFocused = false;
+		this._inputFocused = false;
 		this.data = [];
-		// this.shadowRoot.querySelector('iron-dropdown').close();
 		this.dispatchEvent(new CustomEvent('input-blur'));
 	}
 
@@ -569,11 +569,8 @@ class TagPicker extends LitElement {
 	}
 
 	_focus() {
-		if (this._blurHandle) {
-			this.cancelAsync(this._blurHandle);
-		}
-		this.inputFocused = true;
-		this._activeValueIndex = -1;
+		this._inputFocused = true;
+		this._activeTagIndex = -1;
 		this.dispatchEvent(new CustomEvent('input-focus'));
 	}
 
@@ -581,10 +578,10 @@ class TagPicker extends LitElement {
 		console.log('keydown: ', e.keyCode);
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
-			if (this._activeValueIndex >= 0) {
-				console.log('about to remove (via backspace): ', this._activeValueIndex);
-				this._removeSelected(this._activeValueIndex);
-				this._activeValueIndex = -1;
+			if (this._activeTagIndex >= 0) {
+				console.log('about to remove (via backspace): ', this._activeTagIndex);
+				this._removeSelected(this._activeTagIndex);
+				this._activeTagIndex = -1;
 				e.preventDefault();
 				return;
 			}
@@ -593,11 +590,11 @@ class TagPicker extends LitElement {
 			// select the last value
 			if (e.srcElement.selectionStart === 0 &&
                     e.srcElement.selectionEnd === 0) {
-				this._activeValueIndex = this.tags.length - 1;
+				this._activeTagIndex = this.tags.length - 1;
 			}
 		} else if (e.keyCode === 37) { // left arrow
-			console.log('pressed left with active value index: ', this._activeValueIndex);
-			this._activeValueIndex = this.tags.length - 1;
+			console.log('pressed left with active value index: ', this._activeTagIndex);
+			this._activeTagIndex = this.tags.length - 1;
 		} else if (e.keyCode === 40) { // down arrow
 			if (this.hideDropdown) {
 				this.hideDropdown = false;
@@ -623,23 +620,23 @@ class TagPicker extends LitElement {
 	_selectedKeydown(e) {
 		if (e.keyCode === 8) {
 			console.log('removeSelected from selectedKeydown');
-			this._removeSelected(this._activeValueIndex);
+			this._removeSelected(this._activeTagIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
-			console.log('pressed left with active value index: ', this._activeValueIndex);
-			if (this._activeValueIndex > 0 && this._activeValueIndex < this.tags.length) {
-				this._activeValueIndex -= 1;
+			console.log('pressed left with active value index: ', this._activeTagIndex);
+			if (this._activeTagIndex > 0 && this._activeTagIndex < this.tags.length) {
+				this._activeTagIndex -= 1;
 			} else {
-				this._activeValueIndex = this.tags.length - 1;
+				this._activeTagIndex = this.tags.length - 1;
 			}
 		}
 		else if (e.keyCode === 39) { // right arrow
-			console.log('pressed left with active value index: ', this._activeValueIndex);
-			if (this._activeValueIndex >= 0 && this._activeValueIndex < this.tags.length - 1) {
-				this._activeValueIndex += 1;
+			console.log('pressed left with active value index: ', this._activeTagIndex);
+			if (this._activeTagIndex >= 0 && this._activeTagIndex < this.tags.length - 1) {
+				this._activeTagIndex += 1;
 			} else {
-				this._activeValueIndex = -1;
+				this._activeTagIndex = -1;
 				this.shadowRoot.querySelector('.selectize-input').focus();
 			}
 		}
@@ -662,17 +659,7 @@ class TagPicker extends LitElement {
 
 	_onListItemTapped(e) {
 		console.log('tapped: [', e.target.value, ']');
-		// const index = this._listItemIndexForEvent(e);
-		// const data = this._filteredData[index];
 		const data = e.target.value;
-		// this.dispatchEvent(new CustomEvent('selectize-item-selected', {
-		// 	bubbles: true,
-		// 	composed: true,
-		// 	detail: {
-		// 		index,
-		// 		item: data
-		// 	}
-		// }));
 		this._addTag(data);
 	}
 
@@ -680,14 +667,6 @@ class TagPicker extends LitElement {
 		console.log('_onSelectEnterPressed');
 		const index = this._dropdownIndex;
 		const data = this._filteredData[index];
-		// this.dispatchEvent(new CustomEvent('selectize-item-selected', {
-		// 	bubbles: true,
-		// 	composed: true,
-		// 	detail: {
-		// 		index,
-		// 		item: data
-		// 	}
-		// }));
 		this._addTag(data);
 	}
 
@@ -695,11 +674,11 @@ class TagPicker extends LitElement {
 		console.log('removeSelected called: ', index);
 		this.tags.splice(index, 1);
 		this.data = [];
-		if (index === this._activeValueIndex) {
-			this._activeValueIndex = -1;
-		} else if (index < this._activeValueIndex) {
+		if (index === this._activeTagIndex) {
+			this._activeTagIndex = -1;
+		} else if (index < this._activeTagIndex) {
 			setTimeout(() => {
-				this._activeValueIndex -= 1;
+				this._activeTagIndex -= 1;
 			}, 5);
 		}
 	}
@@ -736,13 +715,12 @@ class TagPicker extends LitElement {
 
 	_selectValue(e) {
 		if (e.srcElement.tagName.toLowerCase() === 'span') {
-			this._activeValueIndex = e.model.index;
+			this._activeTagIndex = e.model.index;
 		}
 	}
 
 	_textChanged(event) {
 		this.text = event.target.value;
-		this.dispatchEvent(new CustomEvent('text-changed', {detail: this.text})); // is this needed?
 	}
 
 	_textForItem(item) {
@@ -750,14 +728,11 @@ class TagPicker extends LitElement {
 	}
 
 	_valueBlur() {
-		// this._valueBlurHandle = this.async(this._handleValueBlur, 100);
 		this._valueBlurHandle = setTimeout(this._handleValueBlur, 100);
-		// this is an awful variable name, who's idea was this
 	}
 
 	_valueFocus() {
 		if (this._valueBlurHandle) {
-			// this.cancelAsync(this._valueBlurHandle);
 			clearTimeout(this._valueBlurHandle);
 			return;
 		}

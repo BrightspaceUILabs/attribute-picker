@@ -66,12 +66,6 @@ class TagPicker extends LitElement {
 			},
 			_uniqueId: {
 				type: String,
-			},
-			_valueBlurHandle: {
-				type: Number,
-			},
-			_valueFocused: {
-				type: Boolean,
 			}
 		};
 	}
@@ -129,11 +123,6 @@ class TagPicker extends LitElement {
 		:host:disabled {
 			opacity: 0.5;
 		}
-		:host::-ms-clear {
-			display: none;
-			width: 0;
-			height: 0;
-		}
 		:host([hidden]) {
 			display: none;
 		}
@@ -144,17 +133,8 @@ class TagPicker extends LitElement {
 		input[type=text]:focus {
 			padding: 0 !important;
 		}
-		input[type=text] {
-			color: inherit;
-			vertical-align: middle;
-		}
 		/* out of scope */
-		.d2l-input.d2l-input-text {
-			border: none;
-			box-shadow: none;
-		}
-		/* gets applied, but not to the right element */
-		d2l-input-text {
+		.d2l-input {
 			border: none;
 			box-shadow: none;
 		}
@@ -168,23 +148,9 @@ class TagPicker extends LitElement {
 			border: 1px solid #DDDDDD;
 			list-style: none;
 		}
-		li {
-			box-sizing: 'border-box';
-			cursor: pointer;
-			padding: 8px;
-		}
 		/* hide the dropdown arrow on the select element */
 		select:not([multiple]) {
 			background-image: none;
-		}
-		li.selected {
-			background-color: var(--d2l-color-celestine-plus-2);
-			color: var(--d2l-color-celestine);
-		}
-		.list {
-			display: flex;
-			flex-direction: column;
-			width: 100%;
 		}
 		.selectedValue {
 			align-items: center;
@@ -213,14 +179,6 @@ class TagPicker extends LitElement {
 			/* display: none; */
 			margin-left: 4px;
 		}
-		d2l-icon.focused {
-			display: inline-flex;
-		}
-		.selectedValue:focus ~ .selectedValue > d2l-icon:hover,
-		:host([input-focused]) > .content > .selectedValue > d2l-icon:hover,
-		.selectedValue > d2l-icon:hover {
-			color: var(--d2l-color-ferrite);
-		}
 		.selectedValue:focus > d2l-icon,
 		.selectedValue:focus > d2l-icon:hover {
 			color: #FFF;
@@ -244,19 +202,24 @@ class TagPicker extends LitElement {
 			width: 100%;
 			margin-top: -1px;
 		}
+
+		.d2l-attribute-list {
+			border: 2px solid #DDDDDD;
+			border-radius: 6px;
+			outline:1px;
+		}
 		`];
 	}
 
 	constructor() {
 		super();
 		this.tags = [];
+		this.assignableAttributes = [];
 		this.text = '';
 		this.hideDropdown = true;
 		this._inputFocused = false;
 		this._activeTagIndex = -1;
 		this._dropdownIndex = -1;
-		this._valueFocused = false;
-		this.assignableAttributes = ['four', 'five', 'six'];
 	}
 
 	get uniqueId() {
@@ -268,13 +231,17 @@ class TagPicker extends LitElement {
 	}
 
 	render() {
+		//Hash the active tags to crosscheck later so assignable dropdown only contains new values
+		const hash = {};
+		this.tags.map((item) => hash[item] = true);
+
 		return html`
 		<div class="content">
 
-		${this.tags.map((item) => html`
-			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}" @blur="${this._valueBlur}" @focus="${this._valueFocus}">
-				${this._computeDisplay(item)}
-				<d2l-icon class="${(this._inputFocused || this.valueFocused) ? 'focused' : ''}" icon="d2l-tier1:close-small" @click="${item.deleteMe}">
+		${this.tags.map((item, index) => html`
+			<div class="selectedValue" tabindex="0" @click="${this._selectValue}" @keydown="${this._selectedKeydown}">
+				${item}
+				<d2l-icon class="${(this._inputFocused || this.valueFocused) ? 'focused' : ''}" .value="${item}" .index="${index}" icon="d2l-tier1:close-small" @click="${this._tagClicked}">
 				</d2l-icon>
 			</div>`)}
 			<input
@@ -296,12 +263,17 @@ class TagPicker extends LitElement {
 			</input>
 		</div>
 
-		<d2l-menu label="Menu Options" ?hidden="${this.hideDropdown}">
-			${this.assignableAttributes.map(item => html`
-				<d2l-menu-item text="${item}" @keydown="${this._keydown}"></d2l-menu-item>
-			`)}
+		<d2l-menu class="d2l-attribute-list" label="Menu Options" ?hidden="${this.hideDropdown}">
+			${this.assignableAttributes.map((item) => (!hash[item] ? html`
+				<d2l-menu-item text="${item}" .value="${item}" @keydown="${this._keydown}" @click="${this._menuItemTapped}"></d2l-menu-item>
+			` : null)) }
 		</d2l-menu>
 		`;
+	}
+
+	_tagClicked(e) {
+		console.log(e.target.index);
+		this._removeTagIndex(e.target.index);
 	}
 
 	updated(changedProperties) {
@@ -339,17 +311,8 @@ class TagPicker extends LitElement {
 		if (!newValue || this.tags.findIndex(tag => tag.value === newValue) >= 0) {
 			return;
 		}
-		const newTag = {
-			value: newValue,
-			deleteMe: () => {
-				this._removeSelected(this.tags.indexOf(newTag));
-			}
-			// note: binding the index instead of creating a new arrow function,
-			// i.e. deleteMe: this._removeSelected.bind(this, this.tags.indexOf(v))
-			// doesn't work because each item's index is captured once and never updated,
-			// so once we start adding and removing items, those initially bound indicies would be out of date
-		};
-		this.tags = [...this.tags, newTag];
+		this.tags = [...this.tags, newValue];
+		this.requestUpdate();
 	}
 
 	_activeTagIndexChanged() {
@@ -363,40 +326,6 @@ class TagPicker extends LitElement {
 		return (typeof index === 'number') ?
 			`${uniqueId}_${id}_${index}` :
 			`${uniqueId}_${id}`;
-	}
-
-	_upArrow(e) {
-		const kE = e.detail.keyboardEvent;
-		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
-			return;
-
-		const inBounds = (this._dropdownIndex - 1) >= 0 &&
-            (this._dropdownIndex - 1) < this.assignableAttributes.length;
-		if (inBounds) {
-			this._selectDropdownIndex(this._dropdownIndex - 1, true);
-		} else {
-			this._selectDropdownIndex(this.assignableAttributes.length - 1, true);
-			if (this.assignableAttributes.length === 0) {
-				this._fireAutoComplete();
-			}
-		}
-		kE.preventDefault();
-	}
-
-	_downArrow(e) {
-		const kE = e.detail.keyboardEvent;
-		if (kE.altKey || kE.ctrlKey || kE.metaKey || kE.shiftKey)
-			return;
-
-		if ((this._dropdownIndex + 1) < this.assignableAttributes.length) {
-			this._selectDropdownIndex(this._dropdownIndex + 1, true);
-		} else {
-			this._selectDropdownIndex(0, true);
-			if (this.assignableAttributes.length === 0) {
-				this._fireAutoComplete();
-			}
-		}
-		kE.preventDefault();
 	}
 
 	_computeAriaSelected(dropdownIndex, assignableAttributes, item) {
@@ -414,10 +343,6 @@ class TagPicker extends LitElement {
 		if (Array.prototype.includes.call(arguments, undefined)) return;
 		const index = filteredData.indexOf(item);
 		return index === dropdownIndex ? 'selected' : '';
-	}
-
-	_computeDisplay(item) {
-		return item.text || item.value || item;
 	}
 
 	_computeInputStyle(text) {
@@ -467,9 +392,7 @@ class TagPicker extends LitElement {
 		console.log('assignableAttributesChanged');
 		if (this.assignableAttributes && this.assignableAttributes.length > 0 && this._inputFocused) {
 			this._selectDropdownIndex(0, true);
-			// this.shadowRoot.querySelector('iron-dropdown').open();
 		} else {
-			// this.shadowRoot.querySelector('iron-dropdown').close();
 			this._selectDropdownIndex(-1, true);
 		}
 	}
@@ -493,26 +416,17 @@ class TagPicker extends LitElement {
 		return null;
 	}
 
-	_handleBlur() {
-		console.log('handleBlur');
-		this._inputFocused = false;
-		this.data = [];
-		this.dispatchEvent(new CustomEvent('input-blur'));
-	}
-
-	_handleValueBlur() {
-		this._valueBlurHandle = null;
-		this.valueFocused = false;
-	}
-
-	_blur() {
-		this.blurHandle = setTimeout(this._handleBlur, 300);
-	}
-
 	_focus() {
 		this._inputFocused = true;
 		this._activeTagIndex = -1;
+		this.hideDropdown = false;
+		this._dropdownIndex = -1;
 		this.dispatchEvent(new CustomEvent('input-focus'));
+	}
+
+	_blur() {
+		this._activeTagIndex = -1;
+		this._inputFocused = false;
 	}
 
 	_keydown(e) {
@@ -520,8 +434,7 @@ class TagPicker extends LitElement {
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
 			if (this._activeTagIndex >= 0) {
-				console.log('about to remove (via backspace): ', this._activeTagIndex);
-				this._removeSelected(this._activeTagIndex);
+				this._removeTagIndex(this._activeTagIndex);
 				this._activeTagIndex = -1;
 				e.preventDefault();
 				return;
@@ -534,34 +447,57 @@ class TagPicker extends LitElement {
 				this._activeTagIndex = this.tags.length - 1;
 			}
 		} else if (e.keyCode === 37) { // left arrow
-			console.log('pressed left with active value index: ', this._activeTagIndex);
 			this._activeTagIndex = this.tags.length - 1;
+
+		} else if (e.keyCode === 38) { // up arrow
+			const assignableCount = this.shadowRoot.querySelectorAll('d2l-menu-item').length;
+			if (!this.hideDropdown) {
+				this.hideDropdown = false;
+				this._dropdownIndex = assignableCount - 1;
+			} else {
+				this._dropdownIndex = (this._dropdownIndex - 1) % assignableCount;
+			}
+			this._updateDropdownFocus();
+
 		} else if (e.keyCode === 40) { // down arrow
+			const assignableCount = this.shadowRoot.querySelectorAll('d2l-menu-item').length;
 			if (this.hideDropdown) {
 				this.hideDropdown = false;
 				this._dropdownIndex = 0;
 			} else {
-				this._dropdownIndex = this._dropdownIndex + 1 % this.assignableAttributes.length;
+				this._dropdownIndex = (this._dropdownIndex + 1) % assignableCount;
 			}
-			setTimeout(() => {
-				const items = this.shadowRoot.querySelectorAll('d2l-menu-item');
-				console.log('items: ', items);
-				items[this._dropdownIndex].focus();
-			});
-		} else if (e.keyCode === 13) {
+			this._updateDropdownFocus();
+
+		} else if (e.keyCode === 13) { //Enter
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < this.assignableAttributes.length) {
-				console.log('pressed enter');
-				this._addTag(this.assignableAttributes[this._dropdownIndex]);
-				this.assignableAttributes.splice(this._dropdownIndex, 1);
+				this._addTag(e.target.value);
 				this._dropdownIndex--;
+				this._updateDropdownFocus();
 			}
 		}
+	}
+
+	_menuItemTapped(e) {
+		this._addTag(e.target.value);
+	}
+
+	_updateDropdownFocus() {
+		this.updateComplete.then(() => {
+			const items = this.shadowRoot.querySelectorAll('d2l-menu-item');
+			if (items.length > 0 && this._dropdownIndex >= 0) {
+				items[this._dropdownIndex].focus();
+			}
+			else {
+				this.hideDropdown = true;
+			}
+		});
 	}
 
 	_selectedKeydown(e) {
 		if (e.keyCode === 8) {
 			console.log('removeSelected from selectedKeydown');
-			this._removeSelected(this._activeTagIndex);
+			this._removeTagIndex(this._activeTagIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
@@ -611,7 +547,7 @@ class TagPicker extends LitElement {
 		this._addTag(data);
 	}
 
-	_removeSelected(index) {
+	_removeTagIndex(index) {
 		console.log('removeSelected called: ', index);
 		this.tags.splice(index, 1);
 		this.data = [];
@@ -622,6 +558,12 @@ class TagPicker extends LitElement {
 				this._activeTagIndex -= 1;
 			}, 5);
 		}
+		this.requestUpdate();
+	}
+
+	_removeTagWithString(newValue) {
+		const index = this.tags.findIndex(tag => tag.value === newValue);
+		this._removeTagIndex(index);
 	}
 
 	_scrollList(index) {
@@ -666,18 +608,6 @@ class TagPicker extends LitElement {
 
 	_textForItem(item) {
 		return item && item.text || item;
-	}
-
-	_valueBlur() {
-		this._valueBlurHandle = setTimeout(this._handleValueBlur, 100);
-	}
-
-	_valueFocus() {
-		if (this._valueBlurHandle) {
-			clearTimeout(this._valueBlurHandle);
-			return;
-		}
-		this._valueFocused = true;
 	}
 
 	_onValuesChanged() {

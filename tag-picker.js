@@ -3,6 +3,7 @@ import '@brightspace-ui/core/components/dropdown/dropdown.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-content.js';
 import '@brightspace-ui/core/components/menu/menu.js';
 import '@brightspace-ui/core/components/menu/menu-item.js';
+import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
 import '@polymer/iron-dropdown/iron-dropdown.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
@@ -269,7 +270,7 @@ class TagPicker extends LitElement {
 		//Hash the active tags to crosscheck later so assignable dropdown only contains new values
 		const hash = {};
 		this.tags.map((item) => hash[item] = true);
-		let dropdownIndex = 0;
+		let listIndex = 0;
 
 		return html`
 		<div class="content">
@@ -280,32 +281,31 @@ class TagPicker extends LitElement {
 				<d2l-icon class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}" .value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}" icon="d2l-tier1:close-small" @click="${this._OnRemoveAttributeClick}">
 				</d2l-icon>
 			</div>`)}
-			<input
-				aria-label="${this.ariaLabel}"
-				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
-				aria-autocomplete="list"
-				aria-haspopup="true"
-				aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
-				class="d2l-input selectize-input"
-				@blur="${this._blur}"
-				@focus="${this._focus}"
-				@keydown="${this._keydown}"
-				@tap="${this._focus}"
-				@input="${this._textChanged}"
-				@change="${this._onInputEnterPressed}"
-				role="combobox"
-				type="text"
-				.value="${this.text}">
-			</input>
 
-			<iron-dropdown .focusTarget="${this._getInputTarget()}"   no-animations no-overlap>
-				<ul slot="dropdown-content" class="d2l-attribute-list" label="Menu Options" role="listbox" aria-multiselectable="true" class="dropdown-content list">
-				${this.assignableAttributes.map((item) => (!hash[item] ? html`
-					<li aria-label="${item}" ?aria-selected="${() => (_this.computeAriaSelected(item))}" .text="${item}" .index=${dropdownIndex++} class="${this._computeListItemClass(item, this._dropdownIndex)}" @mouseover="${this._onListItemMouseOver}" @keydown="${this._keydown}" @click="${this._menuItemTapped}"> ${item}
-					</li>
-				` : null)) }
+		<input
+			aria-label="${this.ariaLabel}"
+			aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
+			aria-autocomplete="list"
+			aria-haspopup="true"
+			aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
+			class="d2l-input selectize-input d2l-dropdown-opener"
+			@blur="${this._blur}"
+			@focus="${this._focus}"
+			@keydown="${this._keydown}"
+			@tap="${this._focus}"
+			@input="${this._textChanged}"
+			@change="${this._onInputEnterPressed}"
+			role="combobox"
+			type="text"
+			.value="${this.text}">
+		</input>
 
-			</iron-dropdown>
+
+		<d2l-menu slot="dropdown-content" ?hidden="${!this._inputFocused || this.hideDropdown}" class="d2l-attribute-list dropdown-content list" label="Menu Options">
+		${this.assignableAttributes.map((item) => (!hash[item] ? html`
+			<li class="${this._dropdownIndex == listIndex? 'selected' : ''}" aria-label="${item}" ?aria-selected="${this._dropdownIndex == listIndex? 'selected' : ''}" .text="${item}" .index=${listIndex++} @mouseover="${this._onListItemMouseOver}" @keydown="${this._keydown}" @click="${this._menuItemTapped}"> ${item}
+			</li>
+		` : null)) }
 		</div>
 		`;
 	}
@@ -326,10 +326,6 @@ class TagPicker extends LitElement {
 	_onListItemMouseOver(e) {
 		const text = e.target.text
 		this._selectDropdownIndex(e.target.index);
-	}
-
-	_openDropdown() {
-		this.shadowRoot.querySelector("iron-dropdown").open();
 	}
 
 	_getInputTarget() {
@@ -476,7 +472,6 @@ class TagPicker extends LitElement {
 		this._inputFocused = true;
 		this._activeTagIndex = -1;
 		this.hideDropdown = false;
-		this._openDropdown();
 		this._dropdownIndex = -1;
 		this.dispatchEvent(new CustomEvent('input-focus'));
 	}
@@ -507,12 +502,11 @@ class TagPicker extends LitElement {
 
 		} else if (e.keyCode === 38) { // up arrow
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
-			if (!this.hideDropdown) {
+			if (this.hideDropdown) {
 				this.hideDropdown = false;
-				this._openDropdown();
 				this._dropdownIndex = assignableCount - 1;
 			} else {
-				this._dropdownIndex = (this._dropdownIndex - 1) % assignableCount;
+				this._dropdownIndex = this._mod(this._dropdownIndex - 1, assignableCount);
 			}
 			this._updateDropdownFocus();
 
@@ -520,10 +514,9 @@ class TagPicker extends LitElement {
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
 			if (this.hideDropdown) {
 				this.hideDropdown = false;
-				this._openDropdown();
 				this._dropdownIndex = 0;
 			} else {
-				this._dropdownIndex = (this._dropdownIndex + 1) % assignableCount;
+				this._dropdownIndex = this._mod(this._dropdownIndex + 1, assignableCount);
 			}
 			this._updateDropdownFocus();
 
@@ -668,6 +661,11 @@ class TagPicker extends LitElement {
 	// was a behaviour in manager-view-fra - having it copy & pasted may not be the best thing
 	computeAriaBoolean(booleanValue) {
 		return booleanValue ? 'true' : 'false';
+	}
+
+	// % operand permits negative values, which isn't helpful for our menus.
+	_mod(n, m) {
+		return ((n % m) + m) % m;
 	}
 }
 customElements.define('d2l-labs-tag-picker', TagPicker);

@@ -72,141 +72,133 @@ class TagPicker extends LitElement {
 
 	static get styles() {
 		return [inputStyles, css`
-		:host {
-			border-radius: 6px;
-			border-style: solid;
-			display: inline-block;
-			margin: 0;
-			vertical-align: middle;
-			width: 100%;
-			font-size: 0.8rem;
-		}
-		:host,
-		:host:hover:disabled {
-			background-color: #fff;
-			border-color: var(--d2l-color-mica);
-			border-width: 1px;
-			box-shadow: inset 0 2px 0 0 rgba(185, 194, 208, 0.2);
-			padding: 0.3rem 0.3rem;
-		}
-		:host:hover,
-		:host:focus,
-		:host([input-focused]) {
-			border-color: var(--d2l-color-celestine);
-			border-width: 2px;
-			outline-width: 0;
-		}
-		:host([aria-invalid="true"]) {
-			border-color: var(--d2l-color-cinnabar);
-		}
-		:host:disabled {
-			opacity: 0.5;
-		}
-		:host([hidden]) {
-			display: none;
-		}
-		d2l-menu[hidden] {
-			display: none;
-		}
-		input[type=text]:hover,
-		input[type=text]:focus {
-			padding: 0 !important;
-		}
-		/* out of scope */
-		.d2l-input {
-			border: none;
-			box-shadow: none;
-		}
-		/* hide the dropdown arrow on the select element */
-		select:not([multiple]) {
-			background-image: none;
-		}
-		.selectedValue {
-			align-items: center;
-			background-color: var(--d2l-color-sylvite);
-			border-radius: 6px;
-			color: var(--d2l-color-ferrite);
-			cursor: pointer;
-			display: flex;
-			margin: 1px 5px 1px 1px;
-			overflow: hidden;
-			padding: 0px 8px;
-			position: relative;
-			text-overflow: ellipsis;
-			height: 1.55rem;
-		}
-		.selectedValue:hover {
-			background-color: var(--d2l-color-gypsum);
-		}
-		.selectedValue:focus, .selectedValue:focus > d2l-icon {
-			outline: none;
-			background-color: var(--d2l-color-celestine);
-			color: #FFF;
-		}
-		d2l-icon {
-			color: rgba(86, 90, 92, 0.5); /* --d2l-color-ferrite @ 50% */
-			/* display: none; */
-			margin-left: 4px;
-		}
-		.selectedValue:focus > d2l-icon,
-		.selectedValue:focus > d2l-icon:hover {
-			color: #FFF;
-		}
-		.d2l-attribute-picker-input {
-			width: 10px;
-			background: transparent;
-			border: none;
-			outline: 0px;
-			box-shadow: none;
-			box-sizing: border-box;
-			padding: 0px;
-			line-height: 1.4rem;
-			flex-grow: 1;
-			min-height: 0rem; /*Override d2l-input styles*/
-		}
-		.content {
-			display: flex;
-			flex-wrap: wrap;
-			cursor: text;
-			width: 100%;
-			margin-top: -1px;
-		}
-		.d2l-attribute-list {
-			border: 2px solid #DDDDDD;
-			border-radius: 6px;
-			outline:1px;
-			/* Box Model */
-			background-color: #fff;
-			min-height: 0px;
-			max-height: 7.8rem;
+			:host {
 
-			/* Typography */
-			text-overflow: ellipsis;
-			overflow-y: scroll;
+				display: inline-block;
 
-			/* Visual */
-			list-style: none;
-			background-color: #ffffff;
-			border: 1px solid #dddddd;
-		}
+				width: 100%;
+				font-size: 0.8rem;
+			}
+			:host,
+			:host:hover:disabled {
 
-		li {
-			padding: 0.4rem 6rem 0.4rem 0.6rem;
-			margin:0px;
-			cursor: pointer;
-		}
 
-		li.selected {
-			color: var(--d2l-color-celestine);
-			background-color: var(--d2l-color-celestine-plus-2);
-		}
+			}
+			:host:hover,
+			:host:focus,
+			:host([input-focused]) {
 
-		.absolute-container {
-			margin: -0.3rem 0rem 0rem -0.3rem;
-			position:absolute;
-			z-index: 1;
-			min-width: 96.5%;
-		}
+			}
+			:host:disabled {
+				opacity: 0.5;
+			}
+			:host([hidden]) {
+				display: none;
+			}
+			.d2l-attribute-picker-container {
+				border-radius: 6px;
+				border-style: solid;
+				background-color: #fff;
+				border-color: var(--d2l-color-mica);
+				border-width: 1px;
+				box-shadow: inset 0 2px 0 0 rgba(185, 194, 208, 0.2);
+				padding: 5px 5px 5px 5px;
+				vertical-align: middle;
+			}
+			.d2l-attribute-picker-container[input-focused] {
+				border-color: var(--d2l-color-celestine);
+				border-width: 2px;
+				padding: 4px 4px 4px 4px;
+				outline-width: 0;
+			}
+			.d2l-attribute-picker-content {
+				display: flex;
+				flex-wrap: wrap;
+				cursor: text;
+				margin-top: -1px;
+			}
+
+			.selectedAttribute {
+				align-items: center;
+				background-color: var(--d2l-color-sylvite);
+				border-radius: 6px;
+				color: var(--d2l-color-ferrite);
+				cursor: pointer;
+				display: flex;
+				margin: 1px 5px 1px 1px;
+				overflow: hidden;
+				padding: 0px 8px;
+				position: relative;
+				text-overflow: ellipsis;
+				height: 1.55rem;
+			}
+			.selectedAttribute:hover {
+				background-color: var(--d2l-color-gypsum);
+			}
+			.selectedAttribute:focus, .selectedAttribute:focus > d2l-icon {
+				outline: none;
+				background-color: var(--d2l-color-celestine);
+				color: #FFF;
+			}
+			d2l-icon {
+				color: rgba(86, 90, 92, 0.5); /* --d2l-color-ferrite @ 50% */
+				/* display: none; */
+				margin-left: 4px;
+			}
+			.selectedAttribute:focus > d2l-icon,
+			.selectedAttribute:focus > d2l-icon:hover {
+				color: #FFF;
+			}
+			.d2l-attribute-picker-input {
+				width: 10px;
+				background: transparent;
+				border: none;
+				box-shadow: none;
+				box-sizing: border-box;
+				padding: 0px;
+				line-height: 1.4rem;
+				flex-grow: 1;
+
+				/* Override d2l-input styles */
+				min-height: 0rem;
+				padding: 0 !important;
+			}
+			.d2l-attribute-list {
+				border-radius: 6px;
+
+				/* Box Model */
+
+				min-height: 0px;
+				max-height: 7.8rem;
+				overflow-y: scroll;
+
+				/* Typography */
+				text-overflow: ellipsis;
+
+				/* Visual */
+				list-style: none;
+				background-color: #ffffff;
+				border: 1px solid #dddddd;
+				background-color: #fff;
+			}
+
+			li {
+				padding: 0.4rem 6rem 0.4rem 0.6rem;
+				margin:0px;
+				cursor: pointer;
+			}
+
+			li.selected {
+				color: var(--d2l-color-celestine);
+				background-color: var(--d2l-color-celestine-plus-2);
+			}
+
+			.absolute-container {
+				margin: -0.3rem 0rem 0rem -0.3rem;
+				position:absolute;
+				z-index: 1;
+				min-width: 96.5%;
+			}
 		`];
 	}
 
@@ -230,64 +222,66 @@ class TagPicker extends LitElement {
 		let listIndex = 0;
 
 		return html`
-		<div class="content">
-			${this.tags.map((item, index) => html`
-			<div
-				class="selectedValue"
-				tabindex="0" .index="${index}"
-				@click="${this._onAttributeClick}"
-				@keydown="${this._onAttributeKeydown}"
-				@blur="${this._onAttributeBlur}"
-				@focus="${this._onAttributeFocus}">
-					${item}
-				<d2l-icon
-					class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}"
-					.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}"
-					icon="d2l-tier1:close-small"
-					@click="${this._onRemoveAttributeClick}">
-				</d2l-icon>
-			</div>`)}
+		<div class="d2l-attribute-picker-container" ?input-focused="${this._inputFocused}">
+			<div class="d2l-attribute-picker-content">
+				${this.tags.map((item, index) => html`
+				<div
+					class="selectedAttribute"
+					tabindex="0" .index="${index}"
+					@click="${this._onAttributeClick}"
+					@keydown="${this._onAttributeKeydown}"
+					@blur="${this._onAttributeBlur}"
+					@focus="${this._onAttributeFocus}">
+						${item}
+					<d2l-icon
+						class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}"
+						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}"
+						icon="d2l-tier1:close-small"
+						@click="${this._onRemoveAttributeClick}">
+					</d2l-icon>
+				</div>`)}
 
-			<input
-				aria-label="${this.ariaLabel}"
-				aria-activedescendant="attribute-dropdown-list-item-${this._dropdownIndex}"
-				aria-autocomplete="list"
-				aria-haspopup="true"
-				aria-owns="attribute-dropdown-list"
-				class="d2l-input d2l-attribute-picker-input"
-				@blur="${this._blur}"
-				@focus="${this._focus}"
-				@keydown="${this._keydown}"
-				@tap="${this._focus}"
-				@input="${this._textChanged}"
-				@change="${this._onInputEnterPressed}"
-				role="combobox"
-				type="text"
-				.value="${this.text}">
-			</input>
-		</div>
-
-		<div class="absolute-container">
-			<ul
-				id="attribute-dropdown-list"
-				?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
-				class="d2l-attribute-list"
-				label="Menu Options">
-
-				${availableAttributes.map((item) => html`
-				<li
-					id="attribute-dropdown-list-item-${listIndex}"
-					class="${this._dropdownIndex === listIndex ? 'selected' : ''}"
-					aria-label="${item}"
-					aria-selected="${this._dropdownIndex === listIndex ? true : false}"
-					.text="${item}" .index=${listIndex++}
-					@mouseover="${this._onListItemMouseOver}"
+				<input
+					aria-label="${this.ariaLabel}"
+					aria-activedescendant="attribute-dropdown-list-item-${this._dropdownIndex}"
+					aria-autocomplete="list"
+					aria-haspopup="true"
+					aria-owns="attribute-dropdown-list"
+					class="d2l-input d2l-attribute-picker-input"
+					@blur="${this._blur}"
+					@focus="${this._focus}"
 					@keydown="${this._keydown}"
-					@mousedown="${this._menuItemTapped}">
-					${item}
-				</li>
-				`)}
-			</ul>
+					@tap="${this._focus}"
+					@input="${this._textChanged}"
+					@change="${this._onInputEnterPressed}"
+					role="combobox"
+					type="text"
+					.value="${this.text}">
+				</input>
+			</div>
+
+			<div class="absolute-container">
+				<ul
+					id="attribute-dropdown-list"
+					?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
+					class="d2l-attribute-list"
+					label="Menu Options">
+
+					${availableAttributes.map((item) => html`
+					<li
+						id="attribute-dropdown-list-item-${listIndex}"
+						class="${this._dropdownIndex === listIndex ? 'selected' : ''}"
+						aria-label="${item}"
+						aria-selected="${this._dropdownIndex === listIndex ? true : false}"
+						.text="${item}" .index=${listIndex++}
+						@mouseover="${this._onListItemMouseOver}"
+						@keydown="${this._keydown}"
+						@mousedown="${this._menuItemTapped}">
+						${item}
+					</li>
+					`)}
+				</ul>
+			</div>
 		</div>
 		`;
 	}
@@ -319,7 +313,7 @@ class TagPicker extends LitElement {
 
 	focus(e) {
 		const content = this.shadowRoot
-			.querySelector('.content');
+			.querySelector('.d2l-attribute-picker-content');
 		if (!e || e.target === content) {
 			this.shadowRoot.querySelector('input').focus();
 		}
@@ -334,9 +328,9 @@ class TagPicker extends LitElement {
 	}
 
 	_activeTagIndexChanged() {
-		const selectedValues = this.shadowRoot.querySelectorAll('.selectedValue');
-		if (this._activeTagIndex >= 0 && this._activeTagIndex < selectedValues.length) {
-			selectedValues[this._activeTagIndex].focus();
+		const selectedAttributes = this.shadowRoot.querySelectorAll('.selectedAttribute');
+		if (this._activeTagIndex >= 0 && this._activeTagIndex < selectedAttributes.length) {
+			selectedAttributes[this._activeTagIndex].focus();
 		}
 	}
 

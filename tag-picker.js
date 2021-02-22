@@ -75,30 +75,11 @@ class TagPicker extends LitElement {
 		:host {
 			border-radius: 6px;
 			border-style: solid;
-			box-sizing: border-box;
 			display: inline-block;
-			min-height: 42px;
 			margin: 0;
 			vertical-align: middle;
 			width: 100%;
-			-webkit-transition-duration: 0.5s;
-							transition-duration: 0.5s;
-			-webkit-transition-timing-function: ease;
-							transition-timing-function: ease;
-			-webkit-transition-property: background-color, border-color;
-			transition-property: background-color, border-color;
-			color: var(--d2l-color-ferrite);
 			font-size: 0.8rem;
-			font-family: inherit;
-			font-weight: 400;
-			letter-spacing: 0.01rem;
-			line-height: 1.4rem;
-		}
-		:host::-webkit-input-placeholder,
-		:host::-moz-placeholder,
-		:host:-ms-input-placeholder,
-		:host::placeholder {
-			color: var(--d2l-color-mica);
 		}
 		:host,
 		:host:hover:disabled {
@@ -114,8 +95,6 @@ class TagPicker extends LitElement {
 			border-color: var(--d2l-color-celestine);
 			border-width: 2px;
 			outline-width: 0;
-			padding: -webkit-calc(0.3rem - 1px) -webkit-calc(0.3rem - 1px);
-			padding: calc(0.3rem - 1px) calc(0.3rem - 1px);
 		}
 		:host([aria-invalid="true"]) {
 			border-color: var(--d2l-color-cinnabar);
@@ -173,7 +152,7 @@ class TagPicker extends LitElement {
 		.selectedValue:focus > d2l-icon:hover {
 			color: #FFF;
 		}
-		.selectize-input {
+		.d2l-attribute-picker-input {
 			width: 10px;
 			background: transparent;
 			border: none;
@@ -192,20 +171,14 @@ class TagPicker extends LitElement {
 			width: 100%;
 			margin-top: -1px;
 		}
-
 		.d2l-attribute-list {
 			border: 2px solid #DDDDDD;
 			border-radius: 6px;
 			outline:1px;
-		}
-		.dropdown-content {
 			/* Box Model */
 			background-color: #fff;
 			min-height: 0px;
-			max-height: 150px;
-			min-width: 100px;
-			margin: 0;
-			padding: 0;
+			max-height: 7.8rem;
 
 			/* Typography */
 			text-overflow: ellipsis;
@@ -218,11 +191,8 @@ class TagPicker extends LitElement {
 		}
 
 		li {
-			/* Box Model */
-			box-sizing: 'border-box';
-			padding: 8px;
-
-			/* Visual */
+			padding: 0.4rem 6rem 0.4rem 0.6rem;
+			margin:0px;
 			cursor: pointer;
 		}
 
@@ -232,9 +202,10 @@ class TagPicker extends LitElement {
 		}
 
 		.absolute-container {
+			margin: -0.3rem 0rem 0rem -0.3rem;
 			position:absolute;
 			z-index: 1;
-			width:100%;
+			min-width: 96.5%;
 		}
 		`];
 	}
@@ -283,7 +254,7 @@ class TagPicker extends LitElement {
 				aria-autocomplete="list"
 				aria-haspopup="true"
 				aria-owns="attribute-dropdown-list"
-				class="d2l-input selectize-input d2l-dropdown-opener"
+				class="d2l-input d2l-attribute-picker-input"
 				@blur="${this._blur}"
 				@focus="${this._focus}"
 				@keydown="${this._keydown}"
@@ -299,9 +270,8 @@ class TagPicker extends LitElement {
 		<div class="absolute-container">
 			<ul
 				id="attribute-dropdown-list"
-				slot="dropdown-content"
 				?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
-				class="d2l-attribute-list dropdown-content"
+				class="d2l-attribute-list"
 				label="Menu Options">
 
 				${availableAttributes.map((item) => html`
@@ -450,15 +420,17 @@ class TagPicker extends LitElement {
 
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 				this._addTag(list[this._dropdownIndex].text);
+				this.text = '';
 				if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
 					this._dropdownIndex --;
 				}
 			} else if (this.allowFreeform) {
-				if (this.text.trim().length > 0) {
+				const trimmedTag =  this.text.trim();
+				if (trimmedTag.length > 0 && !this.tags.includes(trimmedTag)) {
 					this._addTag(this.text.trim());
+					this.text = '';
 				}
 			}
-			this.text = '';
 			this._updateDropdownFocus();
 		}
 	}
@@ -477,7 +449,7 @@ class TagPicker extends LitElement {
 		this.updateComplete.then(() => {
 			const items = this.shadowRoot.querySelectorAll('li');
 			if (items.length > 0 && this._dropdownIndex >= 0) {
-				items[this._dropdownIndex].focus();
+				items[this._dropdownIndex].scrollIntoViewIfNeeded(false);
 			}
 		});
 	}
@@ -498,7 +470,7 @@ class TagPicker extends LitElement {
 	_onAttributeKeydown(e) {
 		if (e.keyCode === 8) {
 			this._removeTagIndex(this._activeTagIndex);
-			this.shadowRoot.querySelector('.selectize-input').focus();
+			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
 			if (this._activeTagIndex > 0 && this._activeTagIndex < this.tags.length) {
@@ -512,13 +484,13 @@ class TagPicker extends LitElement {
 				this._activeTagIndex += 1;
 			} else {
 				this._activeTagIndex = -1;
-				this.shadowRoot.querySelector('.selectize-input').focus();
+				this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
 			}
 		}
 	}
 
 	_labelChanged() {
-		this.shadowRoot.querySelector('.selectize-input').setAttribute('aria-label', this.label);
+		this.shadowRoot.querySelector('.d2l-attribute-picker-input').setAttribute('aria-label', this.label);
 	}
 
 	_removeTagIndex(index) {

@@ -266,7 +266,7 @@ class TagPicker extends LitElement {
 		//Hash the active tags to crosscheck later so assignable dropdown only contains new values
 		const hash = {};
 		this.tags.map((item) => hash[item] = true);
-		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x==='' || x.includes(this.text)));
+		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this.text)));
 
 		let listIndex = 0;
 
@@ -317,8 +317,9 @@ class TagPicker extends LitElement {
 
 				${availableAttributes.map((item) => html`
 				<li
-					class="${this._dropdownIndex == listIndex? 'selected' : ''}"
-					aria-label="${item}" ?aria-selected="${this._dropdownIndex == listIndex? 'selected' : ''}"
+					class="${this._dropdownIndex === listIndex ? 'selected' : ''}"
+					aria-label="${item}"
+					aria-selected="${this._dropdownIndex === listIndex ? true : false}"
 					.text="${item}" .index=${listIndex++}
 					@mouseover="${this._onListItemMouseOver}"
 					@keydown="${this._keydown}"
@@ -330,27 +331,8 @@ class TagPicker extends LitElement {
 		</div>
 		`;
 	}
-
-	_computeListItemClass(item, dropdownIndex) {
-		if(item.index === dropdownIndex) {
-			return 'selected'
-		}
-		return '';
-	}
-	_computeAriaSelected(item) {
-		if(item.index === this._dropdownIndex) {
-			return true
-		}
-		return false;
-	}
-
 	_onListItemMouseOver(e) {
-		const text = e.target.text
 		this._selectDropdownIndex(e.target.index);
-	}
-
-	_getInputTarget() {
-		return this.shadowRoot.querySelector("input");
 	}
 
 	_onRemoveAttributeClick(e) {
@@ -407,23 +389,6 @@ class TagPicker extends LitElement {
 			`${uniqueId}_${id}`;
 	}
 
-	_computeAriaSelected(dropdownIndex, assignableAttributes, item) {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		const index = assignableAttributes.indexOf(item);
-		return index === dropdownIndex;
-	}
-
-	_computeCloseIconClass(inputFocused, valueFocused) {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		return (inputFocused || valueFocused) ? 'focused' : '';
-	}
-
-	_computeInputStyle(text) {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		const length = text && text.length || 0;
-		return `width:${10 * (length + 1)}px;`;
-	}
-
 	_dropdownIndexChanged() {
 		this._selectDropdownItem(this.dropdownIndex);
 	}
@@ -439,25 +404,6 @@ class TagPicker extends LitElement {
 		} else {
 			this._selectDropdownIndex(-1, true);
 		}
-	}
-
-	_fireAutoComplete() {
-		this.dispatchEvent(new CustomEvent('auto-complete', {
-			bubbles: true,
-			composed: true
-		}));
-	}
-
-	_firstElementChild(elem) {
-		let node;
-		const nodes = elem.childNodes;
-		let i = 0;
-		while (node = nodes[i++]) { // eslint-disable-line no-cond-assign
-			if (node.nodeType === 1) {
-				return node;
-			}
-		}
-		return null;
 	}
 
 	_focus() {
@@ -527,7 +473,7 @@ class TagPicker extends LitElement {
 
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 				this._addTag(list[this._dropdownIndex].text);
-				if(list.length == 1 || list.length -1 == this._dropdownIndex) {
+				if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
 					this._dropdownIndex --;
 				}
 			} else if (this.allowFreeform) {
@@ -549,9 +495,6 @@ class TagPicker extends LitElement {
 		this._addTag(e.target.text);
 		this._menuItemFocused = true;
 	}
-	_menuItemBlurred(e) {
-		this._menuItemFocused = false;
-	}
 
 	_updateDropdownFocus() {
 		this.updateComplete.then(() => {
@@ -565,7 +508,7 @@ class TagPicker extends LitElement {
 	_onAttributeBlur(e) {
 		const targetIndex = e.target.index;
 		this.updateComplete.then(() => {
-			if(this._activeTagIndex === targetIndex) {
+			if (this._activeTagIndex === targetIndex) {
 				this._activeTagIndex = -1;
 			}
 		});
@@ -577,12 +520,10 @@ class TagPicker extends LitElement {
 
 	_onAttributeKeydown(e) {
 		if (e.keyCode === 8) {
-			console.log('removeSelected from _onAttributeKeydown');
 			this._removeTagIndex(this._activeTagIndex);
 			this.shadowRoot.querySelector('.selectize-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
-			console.log('pressed left with active value index: ', this._activeTagIndex);
 			if (this._activeTagIndex > 0 && this._activeTagIndex < this.tags.length) {
 				this._activeTagIndex -= 1;
 			} else {
@@ -590,7 +531,6 @@ class TagPicker extends LitElement {
 			}
 		}
 		else if (e.keyCode === 39) { // right arrow
-			console.log('pressed right with active value index: ', this._activeTagIndex);
 			if (this._activeTagIndex >= 0 && this._activeTagIndex < this.tags.length - 1) {
 				this._activeTagIndex += 1;
 			} else {
@@ -603,13 +543,6 @@ class TagPicker extends LitElement {
 	_labelChanged() {
 		this.shadowRoot.querySelector('.selectize-input').setAttribute('aria-label', this.label);
 	}
-
-	_onSelectEnterPressed() {
-		const index = this._dropdownIndex;
-		const data = this.assignableAttributes[index];
-		this._addTag(data);
-	}
-
 	_removeTagIndex(index) {
 		console.log('removeSelected called: ', index);
 		this.tags.splice(index, 1);
@@ -623,12 +556,6 @@ class TagPicker extends LitElement {
 		}
 		this.requestUpdate();
 	}
-
-	_removeTagWithString(newValue) {
-		const index = this.tags.findIndex(tag => tag.value === newValue);
-		this._removeTagIndex(index);
-	}
-
 	_scrollList(index) {
 		const list = this.shadowRoot.querySelector('.list');
 		if (index >= 0 && index < list.children.length) {
@@ -659,28 +586,13 @@ class TagPicker extends LitElement {
 		}
 	}
 
-
 	_textChanged(event) {
 		this.text = event.target.value;
 	}
 
-	_textForItem(item) {
-		return item && item.text || item;
-	}
-
-	_onValuesChanged() {
-		if (Array.prototype.includes.call(arguments, undefined)) return;
-		this.dispatchEvent(new CustomEvent('values-updated'));
-	}
-
-	// was a behaviour in manager-view-fra - having it copy & pasted may not be the best thing
-	computeAriaBoolean(booleanValue) {
-		return booleanValue ? 'true' : 'false';
-	}
-
-	// % operand permits negative values, which isn't helpful for our menus.
-	_mod(n, m) {
-		return ((n % m) + m) % m;
+	// Absolute value % operator for navigating menus.
+	_mod(x, y) {
+		return ((x % y) + y) % y;
 	}
 }
 customElements.define('d2l-labs-tag-picker', TagPicker);

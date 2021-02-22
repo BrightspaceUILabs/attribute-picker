@@ -55,21 +55,18 @@ class TagPicker extends LitElement {
 			_activeTagIndex: {
 				type: Number,
 			},
+			/*
+			* Represents the index of the currently focused dropdown list item. If no item is focused, equals -1.
+			*/
 			_dropdownIndex: {
 				type: Number,
 			},
-			_dropdownItem: {
-				type: Object,
-			},
+			/*
+			* When true, the user currently has focus within the input.
+			*/
 			_inputFocused: {
 				type: Boolean,
 			},
-			_listItemFocused: {
-				type: Boolean,
-			},
-			_uniqueId: {
-				type: String,
-			}
 		};
 	}
 
@@ -249,17 +246,8 @@ class TagPicker extends LitElement {
 		this.text = '';
 		this.hideDropdown = true;
 		this._inputFocused = false;
-		this._listItemFocused = false;
 		this._activeTagIndex = -1;
 		this._dropdownIndex = -1;
-	}
-
-	get uniqueId() {
-		return this.label.toLowerCase().replace(/[\W]/g, '');
-	}
-
-	set uniqueId(newId) {
-		this._uniqueId = newId;
 	}
 
 	render() {
@@ -291,10 +279,10 @@ class TagPicker extends LitElement {
 
 			<input
 				aria-label="${this.ariaLabel}"
-				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
+				aria-activedescendant="attribute-dropdown-list-item-${this._dropdownIndex}"
 				aria-autocomplete="list"
 				aria-haspopup="true"
-				aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
+				aria-owns="attribute-dropdown-list"
 				class="d2l-input selectize-input d2l-dropdown-opener"
 				@blur="${this._blur}"
 				@focus="${this._focus}"
@@ -310,13 +298,15 @@ class TagPicker extends LitElement {
 
 		<div class="absolute-container">
 			<ul
+				id="attribute-dropdown-list"
 				slot="dropdown-content"
-				?hidden="${(!this._inputFocused && !this._listItemFocused) || this.hideDropdown || availableAttributes.length === 0}"
+				?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
 				class="d2l-attribute-list dropdown-content"
 				label="Menu Options">
 
 				${availableAttributes.map((item) => html`
 				<li
+					id="attribute-dropdown-list-item-${listIndex}"
 					class="${this._dropdownIndex === listIndex ? 'selected' : ''}"
 					aria-label="${item}"
 					aria-selected="${this._dropdownIndex === listIndex ? true : false}"
@@ -348,9 +338,6 @@ class TagPicker extends LitElement {
 		if (changedProperties.has('label')) {
 			this._labelChanged();
 		}
-		if (changedProperties.has('_dropdownIndex')) {
-			this._dropdownIndexChanged();
-		}
 		if (changedProperties.has('assignableAttributes')) {
 			this._assignableAttributesChanged();
 		}
@@ -381,16 +368,6 @@ class TagPicker extends LitElement {
 		if (this._activeTagIndex >= 0 && this._activeTagIndex < selectedValues.length) {
 			selectedValues[this._activeTagIndex].focus();
 		}
-	}
-
-	_applyPrefix(uniqueId, id, index) {
-		return (typeof index === 'number') ?
-			`${uniqueId}_${id}_${index}` :
-			`${uniqueId}_${id}`;
-	}
-
-	_dropdownIndexChanged() {
-		this._selectDropdownItem(this.dropdownIndex);
 	}
 
 	_limitReached(increment) {
@@ -543,6 +520,7 @@ class TagPicker extends LitElement {
 	_labelChanged() {
 		this.shadowRoot.querySelector('.selectize-input').setAttribute('aria-label', this.label);
 	}
+
 	_removeTagIndex(index) {
 		console.log('removeSelected called: ', index);
 		this.tags.splice(index, 1);
@@ -556,6 +534,7 @@ class TagPicker extends LitElement {
 		}
 		this.requestUpdate();
 	}
+
 	_scrollList(index) {
 		const list = this.shadowRoot.querySelector('.list');
 		if (index >= 0 && index < list.children.length) {
@@ -572,18 +551,6 @@ class TagPicker extends LitElement {
 		// don't want to scroll on mouseover
 		if (shouldScroll) this._scrollList(index);
 		this._dropdownIndex = index;
-	}
-
-	_selectDropdownItem(index) {
-		const inBounds = index >= 0 &&
-            this.assignableAttributes &&
-            this.assignableAttributes.length > 0 &&
-            index < this.assignableAttributes.length;
-		if (inBounds) {
-			this._dropdownItem = this.assignableAttributes[index];
-		} else {
-			this._dropdownItem = null;
-		}
 	}
 
 	_textChanged(event) {

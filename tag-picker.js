@@ -2,9 +2,7 @@ import '@brightspace-ui/core/components/icons/icon.js';
 import '@brightspace-ui/core/components/dropdown/dropdown.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-content.js';
 import '@brightspace-ui/core/components/menu/menu.js';
-import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
-import '@polymer/iron-dropdown/iron-dropdown.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
 
@@ -64,6 +62,9 @@ class TagPicker extends LitElement {
 				type: Object,
 			},
 			_inputFocused: {
+				type: Boolean,
+			},
+			_listItemFocused: {
 				type: Boolean,
 			},
 			_uniqueId: {
@@ -140,16 +141,6 @@ class TagPicker extends LitElement {
 			border: none;
 			box-shadow: none;
 		}
-		.dropdown-content {
-			background-color: #fff;
-			max-height: 150px;
-			min-width: 100px;
-			text-overflow: ellipsis;
-			margin: 0px;
-			padding: 0px;
-			border: 1px solid #DDDDDD;
-			list-style: none;
-		}
 		/* hide the dropdown arrow on the select element */
 		select:not([multiple]) {
 			background-image: none;
@@ -210,16 +201,18 @@ class TagPicker extends LitElement {
 			border-radius: 6px;
 			outline:1px;
 		}
-
 		.dropdown-content {
 			/* Box Model */
-			min-width: 100px;
+			background-color: #fff;
+			min-height: 0px;
 			max-height: 150px;
+			min-width: 100px;
 			margin: 0;
 			padding: 0;
 
 			/* Typography */
 			text-overflow: ellipsis;
+			overflow-y: scroll;
 
 			/* Visual */
 			list-style: none;
@@ -236,13 +229,15 @@ class TagPicker extends LitElement {
 			cursor: pointer;
 		}
 
-		iron-dropdown {
-			width: 100%;
-		}
-
 		li.selected {
 			color: var(--d2l-color-celestine);
 			background-color: var(--d2l-color-celestine-plus-2);
+		}
+
+		.absolute-container {
+			position:absolute;
+			z-index: 1;
+			width:100%;
 		}
 		`];
 	}
@@ -254,6 +249,7 @@ class TagPicker extends LitElement {
 		this.text = '';
 		this.hideDropdown = true;
 		this._inputFocused = false;
+		this._listItemFocused = false;
 		this._activeTagIndex = -1;
 		this._dropdownIndex = -1;
 	}
@@ -270,42 +266,67 @@ class TagPicker extends LitElement {
 		//Hash the active tags to crosscheck later so assignable dropdown only contains new values
 		const hash = {};
 		this.tags.map((item) => hash[item] = true);
+		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x==='' || x.includes(this.text)));
+
 		let listIndex = 0;
 
 		return html`
 		<div class="content">
-
-		${this.tags.map((item, index) => html`
-			<div class="selectedValue" tabindex="0" .index="${index}" @click="${this._onAttributeClick}" @keydown="${this._onAttributeKeydown}" @blur="${this._onAttributeBlur}" @focus="${this._onAttributeFocus}">
-				${item}
-				<d2l-icon class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}" .value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}" icon="d2l-tier1:close-small" @click="${this._OnRemoveAttributeClick}">
+			${this.tags.map((item, index) => html`
+			<div
+				class="selectedValue"
+				tabindex="0" .index="${index}"
+				@click="${this._onAttributeClick}"
+				@keydown="${this._onAttributeKeydown}"
+				@blur="${this._onAttributeBlur}"
+				@focus="${this._onAttributeFocus}">
+					${item}
+				<d2l-icon
+					class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}"
+					.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}"
+					icon="d2l-tier1:close-small"
+					@click="${this._onRemoveAttributeClick}">
 				</d2l-icon>
 			</div>`)}
 
-		<input
-			aria-label="${this.ariaLabel}"
-			aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
-			aria-autocomplete="list"
-			aria-haspopup="true"
-			aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
-			class="d2l-input selectize-input d2l-dropdown-opener"
-			@blur="${this._blur}"
-			@focus="${this._focus}"
-			@keydown="${this._keydown}"
-			@tap="${this._focus}"
-			@input="${this._textChanged}"
-			@change="${this._onInputEnterPressed}"
-			role="combobox"
-			type="text"
-			.value="${this.text}">
-		</input>
+			<input
+				aria-label="${this.ariaLabel}"
+				aria-activedescendant="${this._applyPrefix(this._uniqueId, 'item', this._dropdownIndex)}"
+				aria-autocomplete="list"
+				aria-haspopup="true"
+				aria-owns="${this._applyPrefix(this._uniqueId, 'dropdown')}"
+				class="d2l-input selectize-input d2l-dropdown-opener"
+				@blur="${this._blur}"
+				@focus="${this._focus}"
+				@keydown="${this._keydown}"
+				@tap="${this._focus}"
+				@input="${this._textChanged}"
+				@change="${this._onInputEnterPressed}"
+				role="combobox"
+				type="text"
+				.value="${this.text}">
+			</input>
+		</div>
 
+		<div class="absolute-container">
+			<ul
+				slot="dropdown-content"
+				?hidden="${(!this._inputFocused && !this._listItemFocused) || this.hideDropdown || availableAttributes.length === 0}"
+				class="d2l-attribute-list dropdown-content"
+				label="Menu Options">
 
-		<d2l-menu slot="dropdown-content" ?hidden="${!this._inputFocused || this.hideDropdown}" class="d2l-attribute-list dropdown-content list" label="Menu Options">
-		${this.assignableAttributes.map((item) => (!hash[item] ? html`
-			<li class="${this._dropdownIndex == listIndex? 'selected' : ''}" aria-label="${item}" ?aria-selected="${this._dropdownIndex == listIndex? 'selected' : ''}" .text="${item}" .index=${listIndex++} @mouseover="${this._onListItemMouseOver}" @keydown="${this._keydown}" @click="${this._menuItemTapped}"> ${item}
-			</li>
-		` : null)) }
+				${availableAttributes.map((item) => html`
+				<li
+					class="${this._dropdownIndex == listIndex? 'selected' : ''}"
+					aria-label="${item}" ?aria-selected="${this._dropdownIndex == listIndex? 'selected' : ''}"
+					.text="${item}" .index=${listIndex++}
+					@mouseover="${this._onListItemMouseOver}"
+					@keydown="${this._keydown}"
+					@mousedown="${this._menuItemTapped}">
+					${item}
+				</li>
+				`)}
+			</ul>
 		</div>
 		`;
 	}
@@ -332,9 +353,9 @@ class TagPicker extends LitElement {
 		return this.shadowRoot.querySelector("input");
 	}
 
-	_OnRemoveAttributeClick(e) {
-		console.log(e.target.index);
+	_onRemoveAttributeClick(e) {
 		this._removeTagIndex(e.target.index);
+		this.shadowRoot.querySelector('input').focus();
 	}
 
 	updated(changedProperties) {
@@ -409,35 +430,6 @@ class TagPicker extends LitElement {
 
 	_limitReached(increment) {
 		return this.limit && (this.tags.length + increment > this.limit);
-	}
-
-	_onInputEnterPressed() {
-		console.log('onInputEnterPressed', this.allowFreeform);
-		if (this._limitReached(1)) {
-			this.dispatchEvent(new CustomEvent('selectize-limit-reached', {
-				bubbles: true,
-				composed: true,
-				detail: {
-					limit: this.limit
-				}
-			}));
-			return;
-		}
-
-		if (this.allowFreeform) {
-			if (this.text.trim().length > 0) {
-				this._addTag(this.text.trim());
-				this.text = '';
-			}
-		} else {
-			if (this._dropdownItem) {
-				this._addTag(this._dropdownItem);
-				this.text = '';
-				this.data = [];
-			} else {
-				this._fireAutoComplete();
-			}
-		}
 	}
 
 	_assignableAttributesChanged() {
@@ -522,16 +514,43 @@ class TagPicker extends LitElement {
 
 		} else if (e.keyCode === 13) { //Enter
 			const list = this.shadowRoot.querySelectorAll('li');
+			if (this._limitReached(1)) {
+				this.dispatchEvent(new CustomEvent('selectize-limit-reached', {
+					bubbles: true,
+					composed: true,
+					detail: {
+						limit: this.limit
+					}
+				}));
+				return;
+			}
+
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 				this._addTag(list[this._dropdownIndex].text);
-				this._dropdownIndex--;
-				this._updateDropdownFocus();
+				if(list.length == 1 || list.length -1 == this._dropdownIndex) {
+					this._dropdownIndex --;
+				}
+			} else if (this.allowFreeform) {
+				if (this.text.trim().length > 0) {
+					this._addTag(this.text.trim());
+				}
 			}
+			this.text = '';
+			this._updateDropdownFocus();
 		}
 	}
 
 	_menuItemTapped(e) {
 		this._addTag(e.target.text);
+		e.preventDefault();
+	}
+
+	_menuItemFocused(e) {
+		this._addTag(e.target.text);
+		this._menuItemFocused = true;
+	}
+	_menuItemBlurred(e) {
+		this._menuItemFocused = false;
 	}
 
 	_updateDropdownFocus() {
@@ -539,9 +558,6 @@ class TagPicker extends LitElement {
 			const items = this.shadowRoot.querySelectorAll('li');
 			if (items.length > 0 && this._dropdownIndex >= 0) {
 				items[this._dropdownIndex].focus();
-			}
-			else {
-				this.hideDropdown = true;
 			}
 		});
 	}
@@ -589,7 +605,6 @@ class TagPicker extends LitElement {
 	}
 
 	_onSelectEnterPressed() {
-		console.log('_onSelectEnterPressed');
 		const index = this._dropdownIndex;
 		const data = this.assignableAttributes[index];
 		this._addTag(data);

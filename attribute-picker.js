@@ -64,7 +64,7 @@ class AttributePicker extends LitElement {
 				padding: 5px 5px 5px 5px;
 				vertical-align: middle;
 			}
-			.d2l-attribute-picker-container[input-focused] {
+			.d2l-attribute-picker-container-focused {
 				border-color: var(--d2l-color-celestine);
 				border-width: 2px;
 				padding: 4px 4px 4px 4px;
@@ -77,7 +77,7 @@ class AttributePicker extends LitElement {
 				margin-top: -1px;
 			}
 
-			.selectedAttribute {
+			.d2l-attribute-picker-attribute {
 				align-items: center;
 				background-color: var(--d2l-color-sylvite);
 				border-radius: 6px;
@@ -91,10 +91,10 @@ class AttributePicker extends LitElement {
 				text-overflow: ellipsis;
 				height: 1.55rem;
 			}
-			.selectedAttribute:hover {
+			.d2l-attribute-picker-attribute:hover {
 				background-color: var(--d2l-color-gypsum);
 			}
-			.selectedAttribute:focus, .selectedAttribute:focus > d2l-icon {
+			.d2l-attribute-picker-attribute:focus, .d2l-attribute-picker-attribute:focus > d2l-icon {
 				outline: none;
 				background-color: var(--d2l-color-celestine);
 				color: #FFF;
@@ -102,10 +102,10 @@ class AttributePicker extends LitElement {
 			d2l-icon {
 				color: rgba(86, 90, 92, 0.5); /* --d2l-color-ferrite @ 50% */
 				/* display: none; */
-				margin-left: 4px;
+				margin-left: 0.3rem;
 			}
-			.selectedAttribute:focus > d2l-icon,
-			.selectedAttribute:focus > d2l-icon:hover {
+			.d2l-attribute-picker-attribute:focus > d2l-icon,
+			.d2l-attribute-picker-attribute:focus > d2l-icon:hover {
 				color: #FFF;
 			}
 			.d2l-attribute-picker-input {
@@ -114,20 +114,18 @@ class AttributePicker extends LitElement {
 				border: none;
 				box-shadow: none;
 				box-sizing: border-box;
-				padding: 0px;
-				line-height: 1.4rem;
 				flex-grow: 1;
+				padding: 0px;
+
+
 
 				/* Override d2l-input styles */
 				min-height: 0rem;
 				padding: 0 !important;
 			}
 			.d2l-attribute-list {
-				border-radius: 6px;
-
 				/* Box Model */
-
-				min-height: 0px;
+				min-height: 0rem;
 				max-height: 7.8rem;
 				overflow-y: scroll;
 
@@ -138,21 +136,22 @@ class AttributePicker extends LitElement {
 				list-style: none;
 				background-color: #ffffff;
 				border: 1px solid #dddddd;
+				border-radius: 6px;
 				background-color: #fff;
 			}
 
-			li {
+			.d2l-attribute-picker-li {
 				padding: 0.4rem 6rem 0.4rem 0.6rem;
 				margin:0px;
 				cursor: pointer;
 			}
 
-			li.selected {
+			.d2l-attribute-picker-li.selected {
 				color: var(--d2l-color-celestine);
 				background-color: var(--d2l-color-celestine-plus-2);
 			}
 
-			.absolute-container {
+			.d2l-attribute-picker-absolute-container {
 				margin: -0.3rem 0rem 0rem -0.3rem;
 				position:absolute;
 				z-index: 1;
@@ -172,86 +171,8 @@ class AttributePicker extends LitElement {
 		this._dropdownIndex = -1;
 	}
 
-	render() {
-		//Hash the active attributes to crosscheck later so assignable dropdown only contains new values
-		const hash = {};
-		this.attributes.map((item) => hash[item] = true);
-		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this.text)));
-
-		let listIndex = 0;
-
-		return html`
-		<div class="d2l-attribute-picker-container" ?input-focused="${this._inputFocused}">
-			<div class="d2l-attribute-picker-content">
-				${this.attributes.map((item, index) => html`
-				<div
-					class="selectedAttribute"
-					tabindex="0" .index="${index}"
-					@click="${this._onAttributeClick}"
-					@keydown="${this._onAttributeKeydown}"
-					@blur="${this._onAttributeBlur}"
-					@focus="${this._onAttributeFocus}">
-						${item}
-					<d2l-icon
-						class="${(this._inputFocused || this._activeAttributeIndex > -1) ? 'focused' : ''}"
-						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeAttributeIndex === -1}"
-						icon="d2l-tier1:close-small"
-						@click="${this._onRemoveAttributeClick}">
-					</d2l-icon>
-				</div>`)}
-
-				<input
-					aria-activedescendant="${this._dropdownIndex > -1 ? `attribute-dropdown-list-item-${this._dropdownIndex}` : ''}"
-					aria-autocomplete="list"
-					aria-haspopup="true"
-					aria-expanded="${this._inputFocused}"
-					aria-label="${this.ariaLabel}"
-					aria-owns="attribute-dropdown-list"
-					class="d2l-input d2l-attribute-picker-input"
-					@blur="${this._blur}"
-					@focus="${this._focus}"
-					@keydown="${this._keydown}"
-					@tap="${this._focus}"
-					@input="${this._textChanged}"
-					@change="${this._onInputEnterPressed}"
-					role="combobox"
-					type="text"
-					.value="${this.text}">
-				</input>
-			</div>
-
-			<div class="absolute-container">
-				<ul
-					id="attribute-dropdown-list"
-					?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
-					class="d2l-attribute-list"
-					label="Menu Options">
-
-					${availableAttributes.map((item) => html`
-					<li
-						id="attribute-dropdown-list-item-${listIndex}"
-						class="${this._dropdownIndex === listIndex ? 'selected' : ''}"
-						aria-label="${item}"
-						aria-selected="${this._dropdownIndex === listIndex ? true : false}"
-						.text="${item}" .index=${listIndex++}
-						@mouseover="${this._onListItemMouseOver}"
-						@keydown="${this._keydown}"
-						@mousedown="${this._menuItemTapped}">
-						${item}
-					</li>
-					`)}
-				</ul>
-			</div>
-		</div>
-		`;
-	}
-	_onListItemMouseOver(e) {
-		this._selectDropdownIndex(e.target.index);
-	}
-
-	_onRemoveAttributeClick(e) {
-		this._removeAttributeIndex(e.target.index);
-		this.shadowRoot.querySelector('input').focus();
+	clearText() {
+		this.text = '';
 	}
 
 	updated(changedProperties) {
@@ -264,47 +185,119 @@ class AttributePicker extends LitElement {
 		}
 	}
 
-	clearText() {
-		this.text = '';
+	render() {
+		//Hash active attributes and filter out unavailable and unmatching dropdown items.
+		const hash = {};
+		this.attributes.map((item) => hash[item] = true);
+		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this.text)));
+		let listIndex = 0;
+
+		return html`
+		<div class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
+			<div class="d2l-attribute-picker-content">
+				${this.attributes.map((item, index) => html`
+				<div
+					class="d2l-attribute-picker-attribute"
+					tabindex="0" .index="${index}"
+					@keydown="${this._onAttributeKeydown}"
+					@blur="${this._onAttributeBlur}"
+					@focus="${this._onAttributeFocus}">
+						${item}
+					<d2l-icon
+						class="${(this._inputFocused || this._activeAttributeIndex > -1) ? 'focused' : ''}"
+						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeAttributeIndex === -1}"
+						icon="d2l-tier1:close-small"
+						@click="${this._onAttributeRemoveClick}">
+					</d2l-icon>
+				</div>`)}
+
+				<input
+					aria-activedescendant="${this._dropdownIndex > -1 ? `attribute-dropdown-list-item-${this._dropdownIndex}` : ''}"
+					aria-autocomplete="list"
+					aria-haspopup="true"
+					aria-expanded="${this._inputFocused}"
+					aria-label="${this.ariaLabel}"
+					aria-owns="attribute-dropdown-list"
+					class="d2l-input d2l-attribute-picker-input"
+					@blur="${this._onInputBlur}"
+					@focus="${this._onInputFocus}"
+					@keydown="${this._onInputKeydown}"
+					@input="${this._onInputTextChanged}"
+					role="combobox"
+					type="text"
+					.value="${this.text}">
+				</input>
+			</div>
+
+			<div role="listbox" class="d2l-attribute-picker-absolute-container">
+				<ul
+					id="attribute-dropdown-list"
+					?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
+					class="d2l-attribute-list">
+
+					${availableAttributes.map((item) => html`
+					<li id="attribute-dropdown-list-item-${listIndex}"
+						class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
+						aria-label="${item}"
+						aria-selected="${this._dropdownIndex === listIndex ? true : false}"
+						.text="${item}" .index=${listIndex++}
+						@mouseover="${this._onListItemMouseOver}"
+						@mousedown="${this._onListItemTapped}">
+						${item}
+					</li>
+					`)}
+				</ul>
+			</div>
+		</div>
+		`;
 	}
 
-	focus(e) {
-		const content = this.shadowRoot
-			.querySelector('.d2l-attribute-picker-content');
-		if (!e || e.target === content) {
-			this.shadowRoot.querySelector('input').focus();
+	/* Event handlers */
+	_onAttributeBlur(e) {
+		const targetIndex = e.target.index;
+		this.updateComplete.then(() => {
+			if (this._activeAttributeIndex === targetIndex) {
+				this._activeAttributeIndex = -1;
+			}
+		});
+	}
+
+	_onAttributeFocus(e) {
+		this._activeAttributeIndex = e.target.index;
+	}
+
+	_onAttributeKeydown(e) {
+		if (e.keyCode === 8) {
+			this._removeAttributeIndex(this._activeAttributeIndex);
+			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
+		}
+		else if (e.keyCode === 37) { // left arrow
+			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributes.length) {
+				this._activeAttributeIndex -= 1;
+			} else {
+				this._activeAttributeIndex = this.attributes.length - 1;
+			}
+		}
+		else if (e.keyCode === 39) { // right arrow
+			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributes.length - 1) {
+				this._activeAttributeIndex += 1;
+			} else {
+				this._activeAttributeIndex = -1;
+				this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
+			}
 		}
 	}
 
-	_addAttribute(newValue) {
-		if (!newValue || this.attributes.findIndex(attribute => attribute.value === newValue) >= 0) {
-			return;
-		}
-		this.attributes = [...this.attributes, newValue];
-		this.requestUpdate();
+	_onAttributeRemoveClick(e) {
+		this._removeAttributeIndex(e.target.index);
+		this.shadowRoot.querySelector('input').focus();
 	}
 
-	_activeAttributeIndexChanged() {
-		const selectedAttributes = this.shadowRoot.querySelectorAll('.selectedAttribute');
-		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
-			selectedAttributes[this._activeAttributeIndex].focus();
-		}
+	_onInputBlur() {
+		this._inputFocused = false;
 	}
 
-	_limitReached(increment) {
-		return this.limit && (this.attributes.length + increment > this.limit);
-	}
-
-	_assignableAttributesChanged() {
-		console.log('assignableAttributesChanged');
-		if (this.assignableAttributes && this.assignableAttributes.length > 0 && this._inputFocused) {
-			this._selectDropdownIndex(0, true);
-		} else {
-			this._selectDropdownIndex(-1, true);
-		}
-	}
-
-	_focus() {
+	_onInputFocus() {
 		this._inputFocused = true;
 		this._activeAttributeIndex = -1;
 		this.hideDropdown = false;
@@ -312,11 +305,7 @@ class AttributePicker extends LitElement {
 		this.dispatchEvent(new CustomEvent('input-focus'));
 	}
 
-	_blur() {
-		this._inputFocused = false;
-	}
-
-	_keydown(e) {
+	_onInputKeydown(e) {
 		console.log('keydown: ', e.keyCode);
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
@@ -358,7 +347,7 @@ class AttributePicker extends LitElement {
 
 		} else if (e.keyCode === 13) { //Enter
 			const list = this.shadowRoot.querySelectorAll('li');
-			if (this._limitReached(1)) {
+			if (this._attributeLimitReached()) {
 				this.dispatchEvent(new CustomEvent('selectize-limit-reached', {
 					bubbles: true,
 					composed: true,
@@ -386,58 +375,46 @@ class AttributePicker extends LitElement {
 		}
 	}
 
-	_menuItemTapped(e) {
+	_onInputTextChanged(event) {
+		this.text = event.target.value;
+	}
+
+	_onListItemMouseOver(e) {
+		this._dropdownIndex = e.target.index;
+	}
+
+	_onListItemTapped(e) {
 		this._addAttribute(e.target.text);
 		e.preventDefault();
+	}
+
+	_activeAttributeIndexChanged() {
+		const selectedAttributes = this.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
+		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
+			selectedAttributes[this._activeAttributeIndex].focus();
+		}
+	}
+
+	_assignableAttributesChanged() {
+			this._dropdownIndex = -1;
+	}
+
+	/* Helper functions */
+	_addAttribute(newValue) {
+		if (!newValue || this.attributes.findIndex(attribute => attribute.value === newValue) >= 0) {
+			return;
+		}
+		this.attributes = [...this.attributes, newValue];
+		this.requestUpdate();
+	}
+
+	_attributeLimitReached() {
+		return this.limit && (this.attributes.length >= this.limit);
 	}
 
 	_menuItemFocused(e) {
 		this._addAttribute(e.target.text);
 		this._menuItemFocused = true;
-	}
-
-	_updateDropdownFocus() {
-		this.updateComplete.then(() => {
-			const items = this.shadowRoot.querySelectorAll('li');
-			if (items.length > 0 && this._dropdownIndex >= 0) {
-				items[this._dropdownIndex].scrollIntoViewIfNeeded(false);
-			}
-		});
-	}
-
-	_onAttributeBlur(e) {
-		const targetIndex = e.target.index;
-		this.updateComplete.then(() => {
-			if (this._activeAttributeIndex === targetIndex) {
-				this._activeAttributeIndex = -1;
-			}
-		});
-	}
-
-	_onAttributeFocus(e) {
-		this._activeAttributeIndex = e.target.index;
-	}
-
-	_onAttributeKeydown(e) {
-		if (e.keyCode === 8) {
-			this._removeAttributeIndex(this._activeAttributeIndex);
-			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
-		}
-		else if (e.keyCode === 37) { // left arrow
-			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributes.length) {
-				this._activeAttributeIndex -= 1;
-			} else {
-				this._activeAttributeIndex = this.attributes.length - 1;
-			}
-		}
-		else if (e.keyCode === 39) { // right arrow
-			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributes.length - 1) {
-				this._activeAttributeIndex += 1;
-			} else {
-				this._activeAttributeIndex = -1;
-				this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
-			}
-		}
 	}
 
 	_removeAttributeIndex(index) {
@@ -472,8 +449,13 @@ class AttributePicker extends LitElement {
 		this._dropdownIndex = index;
 	}
 
-	_textChanged(event) {
-		this.text = event.target.value;
+	_updateDropdownFocus() {
+		this.updateComplete.then(() => {
+			const items = this.shadowRoot.querySelectorAll('li');
+			if (items.length > 0 && this._dropdownIndex >= 0) {
+				items[this._dropdownIndex].scrollIntoViewIfNeeded(false);
+			}
+		});
 	}
 
 	// Absolute value % operator for navigating menus.

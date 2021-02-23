@@ -6,88 +6,47 @@ import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
 
-class TagPicker extends LitElement {
-
+class AttributePicker extends LitElement {
 	static get properties() {
 		return {
-			/*
-			* When true, the user can manually type any tag they wish. If false, they must select from the dropdown.
-			*/
-			allowFreeform: {
-				type: Boolean
-			},
-			/*
-			* An array of strings available in the dropdown list.
-			*/
-			assignableAttributes: {
-				type: Array,
-			},
-			/*
-			* When true, the autocomplete dropdown will not be displayed to the user.
-			*/
-			hideDropdown: {
-				type: Boolean,
-			},
-			label: {
-				type: String,
-			},
-			/*
-			* The maximum number of tags permitted.
-			*/
-			limit: {
-				type: Number
-			},
-			/*
-			* The inner text of the input.
-			*/
-			text: {
-				type: String,
-			},
-			/*
-			An array of strings representing the attributes currently selected in the picker.
-			*/
-			tags: {
-				type: Array,
-			},
-			/*
-			* Represents the index of the currently focused tag. If no tag is focused, equals -1.
-			*/
-			_activeTagIndex: {
-				type: Number,
-			},
-			/*
-			* Represents the index of the currently focused dropdown list item. If no item is focused, equals -1.
-			*/
-			_dropdownIndex: {
-				type: Number,
-			},
-			/*
-			* When true, the user currently has focus within the input.
-			*/
-			_inputFocused: {
-				type: Boolean,
-			},
+			/* When true, the user can manually type any attribute they wish. If false, they must select from the dropdown. */
+			allowFreeform: { type: Boolean, attribute: 'allow-free-form', reflect: true },
+
+			/* Required; When true, the autocomplete dropdown will not be displayed to the user. */
+			ariaLabel: { type: String, attribute: 'aria-label', reflect: true },
+
+			/* An array of strings available in the dropdown list. */
+			assignableAttributes: { type: Array, attribute: 'assignable-attributes', reflect: true },
+
+			/* When true, the autocomplete dropdown will not be displayed to the user. */
+			hideDropdown: { type: Boolean, attribute: 'hide-dropdown', reflect: true },
+
+			/* The maximum number of attributes permitted. */
+			limit: { type: Number, attribute: 'limit', reflect: true },
+
+			/* An array of strings representing the attributes currently selected in the picker. */
+			attributes: { type: Array, attribute: 'attributes', reflect: true },
+
+			/* The inner text of the input. */
+			text: { type: String, attribute: 'text', reflect: true },
+
+			/* Represents the index of the currently focused attribute. If no attribute is focused, equals -1. */
+			_activeAttributeIndex: { type: Number, reflect: false },
+
+			/* Represents the index of the currently focused dropdown list item. If no item is focused, equals -1. */
+			_dropdownIndex: { type: Number, reflect: false },
+
+			/* When true, the user currently has focus within the input. */
+			_inputFocused: { type: Boolean, reflect: false },
 		};
 	}
 
 	static get styles() {
 		return [inputStyles, css`
 			:host {
-
 				display: inline-block;
-
 				width: 100%;
 				font-size: 0.8rem;
-			}
-			:host,
-			:host:hover:disabled {
-
-
-			}
-			:host:hover,
-			:host:focus,
-			:host([input-focused]) {
-
 			}
 			:host:disabled {
 				opacity: 0.5;
@@ -204,19 +163,19 @@ class TagPicker extends LitElement {
 
 	constructor() {
 		super();
-		this.tags = [];
+		this.attributes = [];
 		this.assignableAttributes = [];
 		this.text = '';
 		this.hideDropdown = true;
 		this._inputFocused = false;
-		this._activeTagIndex = -1;
+		this._activeAttributeIndex = -1;
 		this._dropdownIndex = -1;
 	}
 
 	render() {
-		//Hash the active tags to crosscheck later so assignable dropdown only contains new values
+		//Hash the active attributes to crosscheck later so assignable dropdown only contains new values
 		const hash = {};
-		this.tags.map((item) => hash[item] = true);
+		this.attributes.map((item) => hash[item] = true);
 		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this.text)));
 
 		let listIndex = 0;
@@ -224,7 +183,7 @@ class TagPicker extends LitElement {
 		return html`
 		<div class="d2l-attribute-picker-container" ?input-focused="${this._inputFocused}">
 			<div class="d2l-attribute-picker-content">
-				${this.tags.map((item, index) => html`
+				${this.attributes.map((item, index) => html`
 				<div
 					class="selectedAttribute"
 					tabindex="0" .index="${index}"
@@ -234,18 +193,19 @@ class TagPicker extends LitElement {
 					@focus="${this._onAttributeFocus}">
 						${item}
 					<d2l-icon
-						class="${(this._inputFocused || this._activeTagIndex > -1) ? 'focused' : ''}"
-						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeTagIndex === -1}"
+						class="${(this._inputFocused || this._activeAttributeIndex > -1) ? 'focused' : ''}"
+						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeAttributeIndex === -1}"
 						icon="d2l-tier1:close-small"
 						@click="${this._onRemoveAttributeClick}">
 					</d2l-icon>
 				</div>`)}
 
 				<input
-					aria-label="${this.ariaLabel}"
-					aria-activedescendant="attribute-dropdown-list-item-${this._dropdownIndex}"
+					aria-activedescendant="${this._dropdownIndex > -1 ? `attribute-dropdown-list-item-${this._dropdownIndex}` : ''}"
 					aria-autocomplete="list"
 					aria-haspopup="true"
+					aria-expanded="${this._inputFocused}"
+					aria-label="${this.ariaLabel}"
 					aria-owns="attribute-dropdown-list"
 					class="d2l-input d2l-attribute-picker-input"
 					@blur="${this._blur}"
@@ -290,17 +250,14 @@ class TagPicker extends LitElement {
 	}
 
 	_onRemoveAttributeClick(e) {
-		this._removeTagIndex(e.target.index);
+		this._removeAttributeIndex(e.target.index);
 		this.shadowRoot.querySelector('input').focus();
 	}
 
 	updated(changedProperties) {
 		super.updated(changedProperties);
-		if (changedProperties.has('_activeTagIndex')) {
-			this._activeTagIndexChanged(this._activeTagIndex);
-		}
-		if (changedProperties.has('label')) {
-			this._labelChanged();
+		if (changedProperties.has('_activeAttributeIndex')) {
+			this._activeAttributeIndexChanged(this._activeAttributeIndex);
 		}
 		if (changedProperties.has('assignableAttributes')) {
 			this._assignableAttributesChanged();
@@ -319,23 +276,23 @@ class TagPicker extends LitElement {
 		}
 	}
 
-	_addTag(newValue) {
-		if (!newValue || this.tags.findIndex(tag => tag.value === newValue) >= 0) {
+	_addAttribute(newValue) {
+		if (!newValue || this.attributes.findIndex(attribute => attribute.value === newValue) >= 0) {
 			return;
 		}
-		this.tags = [...this.tags, newValue];
+		this.attributes = [...this.attributes, newValue];
 		this.requestUpdate();
 	}
 
-	_activeTagIndexChanged() {
+	_activeAttributeIndexChanged() {
 		const selectedAttributes = this.shadowRoot.querySelectorAll('.selectedAttribute');
-		if (this._activeTagIndex >= 0 && this._activeTagIndex < selectedAttributes.length) {
-			selectedAttributes[this._activeTagIndex].focus();
+		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
+			selectedAttributes[this._activeAttributeIndex].focus();
 		}
 	}
 
 	_limitReached(increment) {
-		return this.limit && (this.tags.length + increment > this.limit);
+		return this.limit && (this.attributes.length + increment > this.limit);
 	}
 
 	_assignableAttributesChanged() {
@@ -349,7 +306,7 @@ class TagPicker extends LitElement {
 
 	_focus() {
 		this._inputFocused = true;
-		this._activeTagIndex = -1;
+		this._activeAttributeIndex = -1;
 		this.hideDropdown = false;
 		this._dropdownIndex = -1;
 		this.dispatchEvent(new CustomEvent('input-focus'));
@@ -363,9 +320,9 @@ class TagPicker extends LitElement {
 		console.log('keydown: ', e.keyCode);
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
-			if (this._activeTagIndex >= 0) {
-				this._removeTagIndex(this._activeTagIndex);
-				this._activeTagIndex = -1;
+			if (this._activeAttributeIndex >= 0) {
+				this._removeAttributeIndex(this._activeAttributeIndex);
+				this._activeAttributeIndex = -1;
 				e.preventDefault();
 				return;
 			}
@@ -374,10 +331,10 @@ class TagPicker extends LitElement {
 			// select the last value
 			if (e.srcElement.selectionStart === 0 &&
                     e.srcElement.selectionEnd === 0) {
-				this._activeTagIndex = this.tags.length - 1;
+				this._activeAttributeIndex = this.attributes.length - 1;
 			}
 		} else if (e.keyCode === 37) { // left arrow
-			this._activeTagIndex = this.tags.length - 1;
+			this._activeAttributeIndex = this.attributes.length - 1;
 
 		} else if (e.keyCode === 38) { // up arrow
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
@@ -413,15 +370,15 @@ class TagPicker extends LitElement {
 			}
 
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
-				this._addTag(list[this._dropdownIndex].text);
+				this._addAttribute(list[this._dropdownIndex].text);
 				this.text = '';
 				if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
 					this._dropdownIndex --;
 				}
 			} else if (this.allowFreeform) {
-				const trimmedTag =  this.text.trim();
-				if (trimmedTag.length > 0 && !this.tags.includes(trimmedTag)) {
-					this._addTag(this.text.trim());
+				const trimmedAttribute =  this.text.trim();
+				if (trimmedAttribute.length > 0 && !this.attributes.includes(trimmedAttribute)) {
+					this._addAttribute(this.text.trim());
 					this.text = '';
 				}
 			}
@@ -430,12 +387,12 @@ class TagPicker extends LitElement {
 	}
 
 	_menuItemTapped(e) {
-		this._addTag(e.target.text);
+		this._addAttribute(e.target.text);
 		e.preventDefault();
 	}
 
 	_menuItemFocused(e) {
-		this._addTag(e.target.text);
+		this._addAttribute(e.target.text);
 		this._menuItemFocused = true;
 	}
 
@@ -451,51 +408,47 @@ class TagPicker extends LitElement {
 	_onAttributeBlur(e) {
 		const targetIndex = e.target.index;
 		this.updateComplete.then(() => {
-			if (this._activeTagIndex === targetIndex) {
-				this._activeTagIndex = -1;
+			if (this._activeAttributeIndex === targetIndex) {
+				this._activeAttributeIndex = -1;
 			}
 		});
 	}
 
 	_onAttributeFocus(e) {
-		this._activeTagIndex = e.target.index;
+		this._activeAttributeIndex = e.target.index;
 	}
 
 	_onAttributeKeydown(e) {
 		if (e.keyCode === 8) {
-			this._removeTagIndex(this._activeTagIndex);
+			this._removeAttributeIndex(this._activeAttributeIndex);
 			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
-			if (this._activeTagIndex > 0 && this._activeTagIndex < this.tags.length) {
-				this._activeTagIndex -= 1;
+			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributes.length) {
+				this._activeAttributeIndex -= 1;
 			} else {
-				this._activeTagIndex = this.tags.length - 1;
+				this._activeAttributeIndex = this.attributes.length - 1;
 			}
 		}
 		else if (e.keyCode === 39) { // right arrow
-			if (this._activeTagIndex >= 0 && this._activeTagIndex < this.tags.length - 1) {
-				this._activeTagIndex += 1;
+			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributes.length - 1) {
+				this._activeAttributeIndex += 1;
 			} else {
-				this._activeTagIndex = -1;
+				this._activeAttributeIndex = -1;
 				this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
 			}
 		}
 	}
 
-	_labelChanged() {
-		this.shadowRoot.querySelector('.d2l-attribute-picker-input').setAttribute('aria-label', this.label);
-	}
-
-	_removeTagIndex(index) {
+	_removeAttributeIndex(index) {
 		console.log('removeSelected called: ', index);
-		this.tags.splice(index, 1);
+		this.attributes.splice(index, 1);
 		this.data = [];
-		if (index === this._activeTagIndex) {
-			this._activeTagIndex = -1;
-		} else if (index < this._activeTagIndex) {
+		if (index === this._activeAttributeIndex) {
+			this._activeAttributeIndex = -1;
+		} else if (index < this._activeAttributeIndex) {
 			setTimeout(() => {
-				this._activeTagIndex -= 1;
+				this._activeAttributeIndex -= 1;
 			}, 5);
 		}
 		this.requestUpdate();
@@ -528,4 +481,4 @@ class TagPicker extends LitElement {
 		return ((x % y) + y) % y;
 	}
 }
-customElements.define('d2l-labs-tag-picker', TagPicker);
+customElements.define('d2l-labs-attribute-picker', AttributePicker);

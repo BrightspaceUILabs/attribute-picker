@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
 const VisualDiff = require('@brightspace-ui/visual-diff');
 
-describe('d2l-labs-tag-picker', () => {
+describe('d2l-labs-attribute-picker', () => {
 
-	const visualDiff = new VisualDiff('tag-picker', __dirname);
+	const visualDiff = new VisualDiff('attribute-picker', __dirname);
 
 	let browser, page;
 
@@ -11,7 +11,7 @@ describe('d2l-labs-tag-picker', () => {
 		browser = await puppeteer.launch();
 		page = await visualDiff.createPage(browser);
 		await page.setViewport({width: 800, height: 800, deviceScaleFactor: 2});
-		await page.goto(`${visualDiff.getBaseUrl()}/test/tag-picker.visual-diff.html`, {waitUntil: ['networkidle0', 'load']});
+		await page.goto(`${visualDiff.getBaseUrl()}/test/attribute-picker.visual-diff.html`, {waitUntil: ['networkidle0', 'load']});
 		await page.bringToFront();
 	});
 

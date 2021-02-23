@@ -12,7 +12,7 @@ class AttributePicker extends LitElement {
 			/* When true, the user can manually type any attribute they wish. If false, they must select from the dropdown. */
 			allowFreeform: { type: Boolean, attribute: 'allow-free-form', reflect: true },
 
-			/* Required; When true, the autocomplete dropdown will not be displayed to the user. */
+			/* Required. When true, the autocomplete dropdown will not be displayed to the user. */
 			ariaLabel: { type: String, attribute: 'aria-label', reflect: true },
 
 			/* An array of strings available in the dropdown list. */
@@ -164,7 +164,7 @@ class AttributePicker extends LitElement {
 		super();
 		this.attributes = [];
 		this.assignableAttributes = [];
-		this.text = '';
+		this._text = '';
 		this.hideDropdown = true;
 		this._inputFocused = false;
 		this._activeAttributeIndex = -1;
@@ -172,7 +172,7 @@ class AttributePicker extends LitElement {
 	}
 
 	clearText() {
-		this.text = '';
+		this._text = '';
 	}
 
 	updated(changedProperties) {
@@ -189,7 +189,7 @@ class AttributePicker extends LitElement {
 		//Hash active attributes and filter out unavailable and unmatching dropdown items.
 		const hash = {};
 		this.attributes.map((item) => hash[item] = true);
-		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this.text)));
+		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this._text)));
 		let listIndex = 0;
 
 		return html`
@@ -225,7 +225,7 @@ class AttributePicker extends LitElement {
 					@input="${this._onInputTextChanged}"
 					role="combobox"
 					type="text"
-					.value="${this.text}">
+					.value="${this._text}">
 				</input>
 			</div>
 
@@ -301,13 +301,10 @@ class AttributePicker extends LitElement {
 	_onInputFocus() {
 		this._inputFocused = true;
 		this._activeAttributeIndex = -1;
-		this.hideDropdown = false;
 		this._dropdownIndex = -1;
-		this.dispatchEvent(new CustomEvent('input-focus'));
 	}
 
 	_onInputKeydown(e) {
-		console.log('keydown: ', e.keyCode);
 		if (e.keyCode === 8) { // backspace
 			// if a value is selected, remove that value
 			if (this._activeAttributeIndex >= 0) {
@@ -328,8 +325,7 @@ class AttributePicker extends LitElement {
 
 		} else if (e.keyCode === 38) { // up arrow
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
-			if (this.hideDropdown) {
-				this.hideDropdown = false;
+			if (this._dropdownIndex === -1) {
 				this._dropdownIndex = assignableCount - 1;
 			} else {
 				this._dropdownIndex = this._mod(this._dropdownIndex - 1, assignableCount);
@@ -338,18 +334,13 @@ class AttributePicker extends LitElement {
 
 		} else if (e.keyCode === 40) { // down arrow
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
-			if (this.hideDropdown) {
-				this.hideDropdown = false;
-				this._dropdownIndex = 0;
-			} else {
-				this._dropdownIndex = this._mod(this._dropdownIndex + 1, assignableCount);
-			}
+			this._dropdownIndex = this._mod(this._dropdownIndex + 1, assignableCount);
 			this._updateDropdownFocus();
 
 		} else if (e.keyCode === 13) { //Enter
 			const list = this.shadowRoot.querySelectorAll('li');
 			if (this._attributeLimitReached()) {
-				this.dispatchEvent(new CustomEvent('selectize-limit-reached', {
+				this.dispatchEvent(new CustomEvent('attribute-limit-reached', {
 					bubbles: true,
 					composed: true,
 					detail: {
@@ -361,15 +352,15 @@ class AttributePicker extends LitElement {
 
 			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 				this._addAttribute(list[this._dropdownIndex].text);
-				this.text = '';
+				this._text = '';
 				if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
 					this._dropdownIndex --;
 				}
 			} else if (this.allowFreeform) {
-				const trimmedAttribute =  this.text.trim();
+				const trimmedAttribute =  this._text.trim();
 				if (trimmedAttribute.length > 0 && !this.attributes.includes(trimmedAttribute)) {
-					this._addAttribute(this.text.trim());
-					this.text = '';
+					this._addAttribute(this._text.trim());
+					this._text = '';
 				}
 			}
 			this._updateDropdownFocus();
@@ -377,7 +368,7 @@ class AttributePicker extends LitElement {
 	}
 
 	_onInputTextChanged(event) {
-		this.text = event.target.value;
+		this._text = event.target.value;
 	}
 
 	_onListItemMouseOver(e) {
@@ -407,6 +398,14 @@ class AttributePicker extends LitElement {
 		}
 		this.attributes = [...this.attributes, newValue];
 		this.requestUpdate();
+
+		this.dispatchEvent(new CustomEvent('attributes-changed', {
+			bubbles: true,
+			composed: true,
+			detail: {
+				attributes: this.attributes
+			}
+		}));
 	}
 
 	_attributeLimitReached() {
@@ -419,7 +418,6 @@ class AttributePicker extends LitElement {
 	}
 
 	_removeAttributeIndex(index) {
-		console.log('removeSelected called: ', index);
 		this.attributes.splice(index, 1);
 		this.data = [];
 		if (index === this._activeAttributeIndex) {
@@ -430,6 +428,14 @@ class AttributePicker extends LitElement {
 			}, 5);
 		}
 		this.requestUpdate();
+
+		this.dispatchEvent(new CustomEvent('attributes-changed', {
+			bubbles: true,
+			composed: true,
+			detail: {
+				attributes: this.attributes
+			}
+		}));
 	}
 
 	_scrollList(index) {

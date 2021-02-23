@@ -237,10 +237,11 @@ class AttributePicker extends LitElement {
 
 					${availableAttributes.map((item) => html`
 					<li id="attribute-dropdown-list-item-${listIndex}"
-						class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
 						aria-label="${item}"
 						aria-selected="${this._dropdownIndex === listIndex ? true : false}"
-						.text="${item}" .index=${listIndex++}
+						class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
+						.text="${item}"
+						.index=${listIndex++}
 						@mouseover="${this._onListItemMouseOver}"
 						@mousedown="${this._onListItemTapped}">
 						${item}

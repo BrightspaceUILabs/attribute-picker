@@ -1,12 +1,12 @@
 {
-  "name": "@brightspace-ui-labs/tag-picker",
-  "description": "Autocompleting dropdown to choose one or more new or pre-existing tags",
-  "repository": "https://github.com/BrightspaceUILabs/tag-picker.git",
+  "name": "@brightspace-ui-labs/attribute-picker",
+  "description": "Autocompleting dropdown to choose one or more new or pre-existing attributes",
+  "repository": "https://github.com/BrightspaceUILabs/attribute-picker.git",
   "private": true,
   "scripts": {
     "lint": "npm run lint:eslint && npm run lint:lit",
     "lint:eslint": "eslint . --ext .js,.html",
-    "lint:lit": "lit-analyzer tag-picker.js demo test",
+    "lint:lit": "lit-analyzer attribute-picker.js demo test",
     "start": "es-dev-server --app-index demo/index.html --node-resolve --dedupe --open --watch",
     "test": "npm run lint && npm run test:headless && npm run test:diff",
     "test:diff": "mocha ./**/*.visual-diff.js -t 40000",

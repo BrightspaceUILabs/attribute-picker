@@ -1,8 +1,8 @@
-# d2l-labs-tag-picker
+# d2l-labs-attribute-picker
 
-[![NPM version](https://img.shields.io/npm/v/@brightspace-ui-labs/tag-picker.svg)](https://www.npmjs.org/package/@brightspace-ui-labs/tag-picker)
-[![Dependabot badge](https://flat.badgen.net/dependabot/BrightspaceUILabs/tag-picker?icon=dependabot)](https://app.dependabot.com/)
-[![Build status](https://travis-ci.com/@brightspace-ui-labs/tag-picker.svg?branch=master)](https://travis-ci.com/@brightspace-ui-labs/tag-picker)
+[![NPM version](https://img.shields.io/npm/v/@brightspace-ui-labs/attribute-picker.svg)](https://www.npmjs.org/package/@brightspace-ui-labs/attribute-picker)
+[![Dependabot badge](https://flat.badgen.net/dependabot/BrightspaceUILabs/attribute-picker?icon=dependabot)](https://app.dependabot.com/)
+[![Build status](https://travis-ci.com/@brightspace-ui-labs/attribute-picker.svg?branch=master)](https://travis-ci.com/@brightspace-ui-labs/attribute-picker)
 
 > Note: this is a ["labs" component](https://github.com/BrightspaceUI/guide/wiki/Component-Tiers). While functional, these tasks are prerequisites to promotion to BrightspaceUI "official" status:
 >
@@ -18,23 +18,23 @@
 > - [ ] Demo page
 > - [ ] README documentation
 
-Autocompleting dropdown to choose one or more new or pre-existing tags
+Autocompleting dropdown to choose one or more new or pre-existing attributes
 
 ## Installation
 
 To install from NPM:
 
 ```shell
-npm install @brightspace-ui-labs/tag-picker
+npm install @brightspace-ui-labs/attribute-picker
 ```
 
 ## Usage
 
 ```html
 <script type="module">
-    import '@brightspace-ui-labs/tag-picker/tag-picker.js';
+    import '@brightspace-ui-labs/attribute-picker/attribute-picker.js';
 </script>
-<d2l-labs-tag-picker>My element</d2l-labs-tag-picker>
+<d2l-labs-attribute-picker>My element</d2l-labs-attribute-picker>
 ```
 
 **Properties:**
@@ -45,7 +45,7 @@ npm install @brightspace-ui-labs/tag-picker
 
 **Accessibility:**
 
-To make your usage of `d2l-labs-tag-picker` accessible, use the following properties when applicable:
+To make your usage of `d2l-labs-attribute-picker` accessible, use the following properties when applicable:
 
 | Attribute | Description |
 |--|--|

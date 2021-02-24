@@ -41,9 +41,9 @@ npm install @brightspace-ui-labs/attribute-picker
 
 | Property | Type | Description |
 |--|--|--|
-| allow-free-form | Boolean | When enabled, the user can manually type any attribute they wish. If false, they must select from the dropdown. |
+| allow-freeform | Boolean | When enabled, the user can manually type any attribute they wish. If false, they must select from the dropdown. |
 | aria-label | String | Required. When true, the autocomplete dropdown will not be displayed to the user. |
-| assignable-attributes | Array |  An array of strings representing the attributes currently selected in the picker. |
+| attributes | Array |  An array of strings representing the attributes currently selected in the picker. |
 | assignable-attributes | Array | An array of strings available in the dropdown list. |
 | hide-dropdown | Boolean | When enabled, the autocomplete dropdown will not be displayed to the user. |
 | limit | Number | The maximum number of attributes permitted. |

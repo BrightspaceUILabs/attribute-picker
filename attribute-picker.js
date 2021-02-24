@@ -165,7 +165,7 @@ class AttributePicker extends LitElement {
 		this.attributes = [];
 		this.assignableAttributes = [];
 		this._text = '';
-		this.hideDropdown = true;
+		this.hideDropdown = false;
 		this._inputFocused = false;
 		this._activeAttributeIndex = -1;
 		this._dropdownIndex = -1;
@@ -193,7 +193,7 @@ class AttributePicker extends LitElement {
 		let listIndex = 0;
 
 		return html`
-		<div class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
+		<div role="presentation" class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
 			<div class="d2l-attribute-picker-content">
 				${this.attributes.map((item, index) => html`
 				<div
@@ -369,6 +369,7 @@ class AttributePicker extends LitElement {
 
 	_onInputTextChanged(event) {
 		this._text = event.target.value;
+		this.requestUpdate();
 	}
 
 	_onListItemMouseOver(e) {

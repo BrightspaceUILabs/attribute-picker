@@ -2,6 +2,14 @@ import '../attribute-picker.js';
 import { expect, fixture, html } from '@open-wc/testing';
 import { runConstructor } from '@brightspace-ui/core/tools/constructor-test-helper.js';
 
+// returns either the event or the returnValIfTimeout, whichever is resolved first
+async function verifyEventTimeout(listener, returnValIfTimeout) {
+	return await Promise.race([
+		listener,
+		new Promise(resolve => setTimeout(() => resolve(returnValIfTimeout), timeout))
+	]);
+}
+
 describe('d2l-labs-attribute-picker', () => {
 
 	describe('accessibility', () => {
@@ -54,8 +62,28 @@ describe('d2l-labs-attribute-picker', () => {
 	});
 
 	describe('eventing', () => {
-		it('should fire the attributes-changed event when adding a tag', async() => {
+		let attributeList = ['one', 'two', 'three'];
+		let availableAttributeList = ['one', 'two', 'three', 'four', 'five', 'six'];
+		let el;
+		beforeEach(async() => {
+			el = await fixture(
+				html`<d2l-labs-attribute-picker
+						allow-free-form
+						.attributes="${attributeList}"
+						.available-attributes="${availableAttributeList}">
+					</d2l-labs-attribute-picker>`
+			);
+		});
 
+		it('should fire the attributes-changed event when adding a tag', async() => {
+			const listener = oneEvent(el, 'attributes-changed');
+
+			const pageNumberInput = el.shadowRoot.querySelector('input');
+			pageNumberInput.value = 'four';
+			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+			const event = await listener;
+			expect(event.detail.page).to.equal(3);
 		});
 
 		it('should fire the attributes-changed event when removing a tag', async() => {

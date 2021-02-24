@@ -10,7 +10,7 @@ class AttributePicker extends LitElement {
 	static get properties() {
 		return {
 			/* When true, the user can manually type any attribute they wish. If false, they must select from the dropdown. */
-			allowFreeform: { type: Boolean, attribute: 'allow-free-form', reflect: true },
+			allowFreeform: { type: Boolean, attribute: 'allow-freeform', reflect: true },
 
 			/* Required. When true, the autocomplete dropdown will not be displayed to the user. */
 			ariaLabel: { type: String, attribute: 'aria-label', reflect: true },

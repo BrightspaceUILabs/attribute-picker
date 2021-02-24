@@ -1,12 +1,10 @@
 import '@brightspace-ui/core/components/icons/icon.js';
-import '@brightspace-ui/core/components/dropdown/dropdown.js';
-import '@brightspace-ui/core/components/dropdown/dropdown-content.js';
-import '@brightspace-ui/core/components/menu/menu.js';
-import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
+import { Localizer } from './lang/localization.js';
+import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 
-class AttributePicker extends LitElement {
+class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	static get properties() {
 		return {
 			/* When true, the user can manually type any attribute they wish. If false, they must select from the dropdown. */
@@ -193,17 +191,21 @@ class AttributePicker extends LitElement {
 		let listIndex = 0;
 
 		return html`
-		<div role="presentation" class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
-			<div class="d2l-attribute-picker-content">
+		<div role="application" class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
+			<div class="d2l-attribute-picker-content" aria-live="polite">
 				${this.attributes.map((item, index) => html`
 				<div
 					class="d2l-attribute-picker-attribute"
-					tabindex="0" .index="${index}"
+					tabindex="0"
+					.index="${index}"
+					aria-label="${this.localize('attribute_name', 'attribute', item)}"
 					@keydown="${this._onAttributeKeydown}"
 					@blur="${this._onAttributeBlur}"
 					@focus="${this._onAttributeFocus}">
 						${item}
 					<d2l-icon
+						aria-live="off"
+						aria-label="${this.localize('remove_attribute', 'attribute', item)}"
 						class="${(this._inputFocused || this._activeAttributeIndex > -1) ? 'focused' : ''}"
 						.value="${item}" .index="${index}" ?hidden="${!this._inputFocused && this._activeAttributeIndex === -1}"
 						icon="d2l-tier1:close-small"
@@ -229,23 +231,23 @@ class AttributePicker extends LitElement {
 				</input>
 			</div>
 
-			<div role="listbox" class="d2l-attribute-picker-absolute-container">
-				<ul
+			<div class="d2l-attribute-picker-absolute-container">
+				<ul role="listbox"
 					id="attribute-dropdown-list"
 					?hidden="${!this._inputFocused || this.hideDropdown || availableAttributes.length === 0}"
 					class="d2l-attribute-list">
 
 					${availableAttributes.map((item) => html`
-					<li id="attribute-dropdown-list-item-${listIndex}"
-						aria-label="${item}"
-						aria-selected="${this._dropdownIndex === listIndex ? true : false}"
-						class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
-						.text="${item}"
-						.index=${listIndex++}
-						@mouseover="${this._onListItemMouseOver}"
-						@mousedown="${this._onListItemTapped}">
-						${item}
-					</li>
+						<li id="attribute-dropdown-list-item-${listIndex}"
+							aria-label="${this.localize('add_attribute', 'attribute', item)}"
+							aria-selected="${this._dropdownIndex === listIndex ? true : false}"
+							class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
+							.text="${item}"
+							.index=${listIndex++}
+							@mouseover="${this._onListItemMouseOver}"
+							@mousedown="${this._onListItemTapped}">
+							${item}
+						</li>
 					`)}
 				</ul>
 			</div>

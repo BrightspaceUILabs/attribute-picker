@@ -391,7 +391,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_assignableAttributesChanged() {
-			this._dropdownIndex = -1;
+		this._dropdownIndex = -1;
 	}
 
 	/* Helper functions */
@@ -421,7 +421,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_removeAttributeIndex(index) {
-		this.attributes.splice(index, 1);
+		this.attributes = this.attributes.slice(index, 1);
 		this.data = [];
 		if (index === this._activeAttributeIndex) {
 			this._activeAttributeIndex = -1;

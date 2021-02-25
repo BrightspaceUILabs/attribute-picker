@@ -37,6 +37,15 @@ describe('d2l-labs-attribute-picker', () => {
 						.available-attributes="${availableAttributeList}"
 					</d2l-labs-attribute-picker>`
 			);
+
+			const pageNumberInput = el.shadowRoot.querySelector('input');
+			pageNumberInput.focus();
+
+			const pageNumberInput = el.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
+
+			const pageNumberInput = el.shadowRoot.querySelectorAll('d2l-attribute-picker-li');
+
+
 		});
 
 		it('should adjust the attributes and dropdown values when set to new values', async() => {

@@ -421,16 +421,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_removeAttributeIndex(index) {
-		this.attributes = this.attributes.slice(index, 1);
-		this.data = [];
-		if (index === this._activeAttributeIndex) {
-			this._activeAttributeIndex = -1;
-		} else if (index < this._activeAttributeIndex) {
-			setTimeout(() => {
-				this._activeAttributeIndex -= 1;
-			}, 5);
-		}
-		this.requestUpdate();
+		this.attributes = this.attributes.slice(0, index).concat(this.attributes.slice(index + 1, this.attributes.length));
+		this._activeAttributeIndex = -1;
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
 			bubbles: true,
@@ -439,24 +431,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				attributes: this.attributes
 			}
 		}));
-	}
-
-	_scrollList(index) {
-		const list = this.shadowRoot.querySelector('.list');
-		if (index >= 0 && index < list.children.length) {
-			const elem = list.children[index];
-			if (elem.offsetTop < list.scrollTop) {
-				list.scrollTop = elem.offsetTop;
-			} else if (elem.offsetHeight + elem.offsetTop > list.offsetHeight + list.scrollTop) {
-				list.scrollTop = elem.offsetTop + elem.offsetHeight - list.offsetHeight;
-			}
-		}
-	}
-
-	_selectDropdownIndex(index, shouldScroll) {
-		// don't want to scroll on mouseover
-		if (shouldScroll) this._scrollList(index);
-		this._dropdownIndex = index;
 	}
 
 	_updateDropdownFocus() {

@@ -331,22 +331,23 @@ describe('d2l-labs-attribute-picker', () => {
 		it('should fire the attribute-limit-reached event when attempting to add a tag beyond the limit', async() => {
 			const listener = oneEvent(el, 'attribute-limit-reached');
 
+			const element = el; //require-atomic-updates deems this necessary
 			const pageNumberInput = el.shadowRoot.querySelector('input');
-			expect(el.attributes.length).to.equal(3);
+			expect(element.attributes.length).to.equal(3);
 
 			pageNumberInput.focus();
-			el._text = 'four';
+			element._text = 'four';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
-			await el.requestUpdate;
-			expect(el.attributes.length).to.equal(4);
-			el._text = 'five';
+			await element.requestUpdate;
+			expect(element.attributes.length).to.equal(4);
+			element._text = 'five';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
-			await el.requestUpdate;
-			expect(el.attributes.length).to.equal(5);
-			el._text = 'six';
+			await element.requestUpdate;
+			expect(element.attributes.length).to.equal(5);
+			element.shadowRoot.querySelector('input').text = 'six';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
-			expect(el.attributes.length).to.equal(5);
-			await el.requestUpdate;
+			expect(element.attributes.length).to.equal(5);
+			await element.requestUpdate;
 
 			const result = await verifyEventTimeout(listener, 'no event fired');
 			expect(result).to.not.equal('no event fired');

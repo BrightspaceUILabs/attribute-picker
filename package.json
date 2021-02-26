@@ -7,6 +7,7 @@
     "lint": "npm run lint:eslint && npm run lint:lit",
     "lint:eslint": "eslint . --ext .js,.html",
     "lint:lit": "lit-analyzer attribute-picker.js demo test --strict --rules.no-unknown-tag-name off --rules.no-unknown-property off",
+    "lint:style": "stylelint \"**/*.js\"",
     "start": "es-dev-server --app-index demo/index.html --node-resolve --dedupe --open --watch",
     "test": "npm run lint && npm run test:headless && npm run test:diff",
     "test:diff": "mocha ./**/*.visual-diff.js -t 40000",
@@ -19,6 +20,7 @@
   "author": "D2L Corporation",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@brightspace-ui/stylelint-config": "0.0.1",
     "@brightspace-ui/visual-diff": "^1",
     "@open-wc/testing": "^2",
     "@open-wc/testing-karma": "^3",
@@ -39,7 +41,8 @@
   "dependencies": {
     "@brightspace-ui/core": "^1.52.5",
     "@webcomponents/webcomponentsjs": "^2",
-    "lit-element": "^2"
+    "lit-element": "^2",
+    "stylelint": "^13.11.0"
   },
   "version": "0.0.0"
 }

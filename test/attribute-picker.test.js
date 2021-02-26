@@ -185,35 +185,35 @@ describe('d2l-labs-attribute-picker', () => {
 			//In allow-freeform, pressing down should focus the first list item.
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Down', keyCode: 40}));
 			await el.updateComplete;
-			let selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			let selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[3]);
 
 			//Select the middle and last item
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Down', keyCode: 40}));
 			await el.updateComplete;
-			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[4]);
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Down', keyCode: 40}));
 			await el.updateComplete;
-			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[5]);
 
 			//Pressing down once more should focus the first item again.
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Down', keyCode: 40}));
 			await el.updateComplete;
-			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[3]);
 
 			//Pressing up should loop back to the end.
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Up', keyCode: 38}));
 			await el.updateComplete;
-			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[5]);
 
 			//Pressing up again should move the selection up once.
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Up', keyCode: 38}));
 			await el.updateComplete;
-			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.selected');
+			selectedDropdown = el.shadowRoot.querySelector('.d2l-attribute-picker-li.d2l-selected');
 			expect(selectedDropdown.innerText).to.equal(assignableAttributeList[4]);
 		});
 

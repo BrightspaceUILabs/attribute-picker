@@ -43,8 +43,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		return [inputStyles, css`
 			:host {
 				display: inline-block;
-				width: 100%;
 				font-size: 0.8rem;
+				width: 100%;
 			}
 			:host:disabled {
 				opacity: 0.5;
@@ -53,10 +53,10 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				display: none;
 			}
 			.d2l-attribute-picker-container {
+				background-color: #ffffff;
+				border-color: var(--d2l-color-mica);
 				border-radius: 6px;
 				border-style: solid;
-				background-color: #fff;
-				border-color: var(--d2l-color-mica);
 				border-width: 1px;
 				box-shadow: inset 0 2px 0 0 rgba(185, 194, 208, 0.2);
 				padding: 5px 5px 5px 5px;
@@ -65,16 +65,15 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			.d2l-attribute-picker-container-focused {
 				border-color: var(--d2l-color-celestine);
 				border-width: 2px;
-				padding: 4px 4px 4px 4px;
 				outline-width: 0;
+				padding: 4px 4px 4px 4px;
 			}
 			.d2l-attribute-picker-content {
+				cursor: text;
 				display: flex;
 				flex-wrap: wrap;
-				cursor: text;
 				margin-top: -1px;
 			}
-
 			.d2l-attribute-picker-attribute {
 				align-items: center;
 				background-color: var(--d2l-color-sylvite);
@@ -82,20 +81,20 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				color: var(--d2l-color-ferrite);
 				cursor: pointer;
 				display: flex;
+				height: 1.55rem;
 				margin: 1px 5px 1px 1px;
 				overflow: hidden;
-				padding: 0px 8px;
+				padding: 0 8px;
 				position: relative;
 				text-overflow: ellipsis;
-				height: 1.55rem;
 			}
 			.d2l-attribute-picker-attribute:hover {
 				background-color: var(--d2l-color-gypsum);
 			}
 			.d2l-attribute-picker-attribute:focus, .d2l-attribute-picker-attribute:focus > d2l-icon {
-				outline: none;
 				background-color: var(--d2l-color-celestine);
-				color: #FFF;
+				color: #ffffff;
+				outline: none;
 			}
 			d2l-icon {
 				color: rgba(86, 90, 92, 0.5); /* --d2l-color-ferrite @ 50% */
@@ -104,56 +103,45 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			}
 			.d2l-attribute-picker-attribute:focus > d2l-icon,
 			.d2l-attribute-picker-attribute:focus > d2l-icon:hover {
-				color: #FFF;
+				color: #ffffff;
 			}
 			.d2l-attribute-picker-input {
-				width: 10px;
 				background: transparent;
 				border: none;
 				box-shadow: none;
 				box-sizing: border-box;
 				flex-grow: 1;
-				padding: 0px;
-
-
-
-				/* Override d2l-input styles */
-				min-height: 0rem;
+				min-height: 0;
 				padding: 0 !important;
+				width: 10px;
 			}
 			.d2l-attribute-list {
-				/* Box Model */
-				min-height: 0rem;
-				max-height: 7.8rem;
-				overflow-y: scroll;
-
-				/* Typography */
-				text-overflow: ellipsis;
-
-				/* Visual */
-				list-style: none;
 				background-color: #ffffff;
 				border: 1px solid #dddddd;
 				border-radius: 6px;
-				background-color: #fff;
+				list-style: none;
+				max-height: 7.8rem;
+				min-height: 0;
+				overflow-y: scroll;
+				text-overflow: ellipsis;
 			}
 
 			.d2l-attribute-picker-li {
-				padding: 0.4rem 6rem 0.4rem 0.6rem;
-				margin:0px;
 				cursor: pointer;
+				margin: 0;
+				padding: 0.4rem 6rem 0.4rem 0.6rem;
 			}
 
-			.d2l-attribute-picker-li.selected {
-				color: var(--d2l-color-celestine);
+			.d2l-attribute-picker-li.d2l-selected {
 				background-color: var(--d2l-color-celestine-plus-2);
+				color: var(--d2l-color-celestine);
 			}
 
 			.d2l-attribute-picker-absolute-container {
-				margin: -0.3rem 0rem 0rem -0.3rem;
-				position:absolute;
-				z-index: 1;
+				margin: 0 0.3rem 0 -0.3rem;
 				min-width: 96.5%;
+				position: absolute;
+				z-index: 1;
 			}
 		`];
 	}
@@ -241,7 +229,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 						<li id="attribute-dropdown-list-item-${listIndex}"
 							aria-label="${this.localize('add_attribute', 'attribute', item)}"
 							aria-selected="${this._dropdownIndex === listIndex ? true : false}"
-							class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'selected' : ''}"
+							class="d2l-attribute-picker-li ${this._dropdownIndex === listIndex ? 'd2l-selected' : ''}"
 							.text="${item}"
 							.index=${listIndex++}
 							@mouseover="${this._onListItemMouseOver}"

@@ -7,7 +7,7 @@ import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	static get properties() {
 		return {
-			/* When true, the user can manually type any attribute they wish. If false, they must select from the dropdown. */
+			/* When true, the user can manually enter any attribute they wish. If false, they must match a value from the dropdown. */
 			allowFreeform: { type: Boolean, attribute: 'allow-freeform', reflect: true },
 
 			/* Required. When true, the autocomplete dropdown will not be displayed to the user. */
@@ -277,8 +277,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		else if (e.keyCode === 37) { // left arrow
 			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributes.length) {
 				this._activeAttributeIndex -= 1;
-			} else {
-				this._activeAttributeIndex = this.attributes.length - 1;
 			}
 		}
 		else if (e.keyCode === 39) { // right arrow
@@ -303,11 +301,24 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	_onInputFocus() {
 		this._inputFocused = true;
 		this._activeAttributeIndex = -1;
-		this._dropdownIndex = -1;
+
+		if (this.allowFreeform) {
+			this._dropdownIndex = -1;
+		}
+		else {
+			this._dropdownIndex = this.shadowRoot.querySelector('li') !== null ? 0 : -1;
+		}
+
 	}
 
 	_onInputKeydown(e) {
-		if (e.keyCode === 8) { // backspace
+		if (e.keyCode === 27) { //Escape
+			if (this.allowFreeform) {
+				//Unselect any dropdown item so enter will apply to just the typed text instead
+				this._dropdownIndex = -1;
+			}
+		}
+		if (e.keyCode === 8) { // Backspace
 			// if a value is selected, remove that value
 			if (this._activeAttributeIndex >= 0) {
 				this._removeAttributeIndex(this._activeAttributeIndex);

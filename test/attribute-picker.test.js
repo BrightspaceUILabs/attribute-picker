@@ -31,6 +31,18 @@ describe('d2l-labs-attribute-picker', () => {
 			const el = await fixture(html`<d2l-labs-attribute-picker></d2l-labs-attribute-picker>`);
 			await expect(el).to.be.accessible();
 		});
+
+		it('should pass all axe tests when populated', async() => {
+			const attributeList = ['one', 'two', 'three'];
+			const assignableAttributeList = ['one', 'two', 'three', 'four', 'five', 'six'];
+			const el = await fixture(
+				html`<d2l-labs-attribute-picker
+						.attributes="${attributeList}"
+						.assignableAttributes="${assignableAttributeList}">
+					</d2l-labs-attribute-picker>`
+			);
+			await expect(el).to.be.accessible();
+		});
 	});
 
 	describe('constructor', () => {

@@ -37,7 +37,7 @@ describe('d2l-labs-attribute-picker', () => {
 			const assignableAttributeList = ['one', 'two', 'three', 'four', 'five', 'six'];
 			const el = await fixture(
 				html`<d2l-labs-attribute-picker
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -59,7 +59,7 @@ describe('d2l-labs-attribute-picker', () => {
 			const el = await fixture(
 				html`<d2l-labs-attribute-picker
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -87,7 +87,7 @@ describe('d2l-labs-attribute-picker', () => {
 			const el = await fixture(
 				html`<d2l-labs-attribute-picker
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -97,7 +97,7 @@ describe('d2l-labs-attribute-picker', () => {
 			await el.updateComplete;
 
 			//Ensure the full list of new assignable attributes are displayed if none are selected
-			el.attributes = [];
+			el.attributeList = [];
 			el.assignableAttributes = changedAssignableList;
 			await el.updateComplete;
 			attributeElements = el.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
@@ -106,7 +106,7 @@ describe('d2l-labs-attribute-picker', () => {
 			expect(evaluateListValues(changedAssignableList, dropdownElements)).to.equal(true);
 
 			//If we change the selection, ensure both the assigned list and assignable list are updated
-			el.attributes = changedAttributeList;
+			el.attributeList = changedAttributeList;
 			await el.updateComplete;
 			attributeElements = el.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
 			expect(evaluateListValues(changedAttributeList, attributeElements)).to.equal(true);
@@ -122,7 +122,7 @@ describe('d2l-labs-attribute-picker', () => {
 				html`<d2l-labs-attribute-picker
 						hide-dropdown
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -141,7 +141,7 @@ describe('d2l-labs-attribute-picker', () => {
 			const el = await fixture(
 				html`<d2l-labs-attribute-picker
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -152,7 +152,7 @@ describe('d2l-labs-attribute-picker', () => {
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
 			await el.updateComplete;
 
-			expect(el.attributes[el.attributes.length - 1]).to.equal('unlisted attribute');
+			expect(el.attributeList[el.attributeList.length - 1]).to.equal('unlisted attribute');
 		});
 
 		it('should prevent unlisted if allow-freeform is disabled.', async() => {
@@ -160,7 +160,7 @@ describe('d2l-labs-attribute-picker', () => {
 			const assignableAttributeList = ['one', 'two', 'three', 'four', 'five', 'six'];
 			const el = await fixture(
 				html`<d2l-labs-attribute-picker
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -171,7 +171,7 @@ describe('d2l-labs-attribute-picker', () => {
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
 			await el.updateComplete;
 
-			expect(el.attributes[el.attributes.length - 1]).to.not.equal('unlisted attribute');
+			expect(el.attributeList[el.attributeList.length - 1]).to.not.equal('unlisted attribute');
 		});
 	});
 
@@ -183,7 +183,7 @@ describe('d2l-labs-attribute-picker', () => {
 			el = await fixture(
 				html`<d2l-labs-attribute-picker
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignableAttributes="${assignableAttributeList}">
 					</d2l-labs-attribute-picker>`
 			);
@@ -308,7 +308,7 @@ describe('d2l-labs-attribute-picker', () => {
 			el = await fixture(
 				html`<d2l-labs-attribute-picker
 						allow-freeform
-						.attributes="${attributeList}"
+						.attributeList="${attributeList}"
 						.assignable-attributes="${assignableAttributeList}"
 						limit="5">
 					</d2l-labs-attribute-picker>`
@@ -325,7 +325,7 @@ describe('d2l-labs-attribute-picker', () => {
 
 			const result = await verifyEventTimeout(listener, 'no event fired');
 			expect(result).to.not.equal('no event fired');
-			expect(result.detail.attributes.length).to.equal(4);
+			expect(result.detail.attributeList.length).to.equal(4);
 		});
 
 		it('should fire the attributes-changed event when removing a tag', async() => {
@@ -345,20 +345,20 @@ describe('d2l-labs-attribute-picker', () => {
 
 			const element = el; //require-atomic-updates deems this necessary
 			const pageNumberInput = el.shadowRoot.querySelector('input');
-			expect(element.attributes.length).to.equal(3);
+			expect(element.attributeList.length).to.equal(3);
 
 			pageNumberInput.focus();
 			element._text = 'four';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
 			await element.requestUpdate;
-			expect(element.attributes.length).to.equal(4);
+			expect(element.attributeList.length).to.equal(4);
 			element._text = 'five';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
 			await element.requestUpdate;
-			expect(element.attributes.length).to.equal(5);
+			expect(element.attributeList.length).to.equal(5);
 			element.shadowRoot.querySelector('input').text = 'six';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13}));
-			expect(element.attributes.length).to.equal(5);
+			expect(element.attributeList.length).to.equal(5);
 			await element.requestUpdate;
 
 			const result = await verifyEventTimeout(listener, 'no event fired');

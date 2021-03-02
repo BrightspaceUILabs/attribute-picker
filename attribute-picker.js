@@ -24,7 +24,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			limit: { type: Number, attribute: 'limit', reflect: true },
 
 			/* An array of strings representing the attributes currently selected in the picker. */
-			attributes: { type: Array, attribute: 'attributes', reflect: true },
+			attributeList: { type: Array, attribute: 'attribute-list', reflect: true },
 
 			/* The inner text of the input. */
 			text: { type: String, attribute: 'text', reflect: true },
@@ -149,7 +149,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	constructor() {
 		super();
-		this.attributes = [];
+		this.attributeList = [];
 		this.assignableAttributes = [];
 		this._text = '';
 		this.hideDropdown = false;
@@ -175,14 +175,14 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	render() {
 		//Hash active attributes and filter out unavailable and unmatching dropdown items.
 		const hash = {};
-		this.attributes.map((item) => hash[item] = true);
+		this.attributeList.map((item) => hash[item] = true);
 		const availableAttributes = this.assignableAttributes.filter(x => hash[x] !== true && (x === '' || x.includes(this._text)));
 		let listIndex = 0;
 
 		return html`
 		<div role="application" class="d2l-attribute-picker-container ${this._inputFocused ? 'd2l-attribute-picker-container-focused' : ''}">
 			<div class="d2l-attribute-picker-content" aria-live="polite">
-				${this.attributes.map((item, index) => html`
+				${this.attributeList.map((item, index) => html`
 				<div
 					class="d2l-attribute-picker-attribute"
 					tabindex="0"
@@ -264,12 +264,12 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
 		}
 		else if (e.keyCode === 37) { // left arrow
-			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributes.length) {
+			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributeList.length) {
 				this._activeAttributeIndex -= 1;
 			}
 		}
 		else if (e.keyCode === 39) { // right arrow
-			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributes.length - 1) {
+			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributeList.length - 1) {
 				this._activeAttributeIndex += 1;
 			} else {
 				this._activeAttributeIndex = -1;
@@ -320,10 +320,10 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			// select the last value
 			if (e.srcElement.selectionStart === 0 &&
                     e.srcElement.selectionEnd === 0) {
-				this._activeAttributeIndex = this.attributes.length - 1;
+				this._activeAttributeIndex = this.attributeList.length - 1;
 			}
 		} else if (e.keyCode === 37) { // left arrow
-			this._activeAttributeIndex = this.attributes.length - 1;
+			this._activeAttributeIndex = this.attributeList.length - 1;
 
 		} else if (e.keyCode === 38) { // up arrow
 			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
@@ -360,7 +360,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				}
 			} else if (this.allowFreeform) {
 				const trimmedAttribute =  this._text.trim();
-				if (trimmedAttribute.length > 0 && !this.attributes.includes(trimmedAttribute)) {
+				if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
 					this._addAttribute(this._text.trim());
 					this._text = '';
 				}
@@ -396,23 +396,23 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	/* Helper functions */
 	_addAttribute(newValue) {
-		if (!newValue || this.attributes.findIndex(attribute => attribute.value === newValue) >= 0) {
+		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
 			return;
 		}
-		this.attributes = [...this.attributes, newValue];
+		this.attributeList = [...this.attributeList, newValue];
 		this.requestUpdate();
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
 			bubbles: true,
 			composed: true,
 			detail: {
-				attributes: this.attributes
+				attributeList: this.attributeList
 			}
 		}));
 	}
 
 	_attributeLimitReached() {
-		return this.limit && (this.attributes.length >= this.limit);
+		return this.limit && (this.attributeList.length >= this.limit);
 	}
 
 	_menuItemFocused(e) {
@@ -421,14 +421,14 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_removeAttributeIndex(index) {
-		this.attributes = this.attributes.slice(0, index).concat(this.attributes.slice(index + 1, this.attributes.length));
+		this.attributeList = this.attributeList.slice(0, index).concat(this.attributeList.slice(index + 1, this.attributeList.length));
 		this._activeAttributeIndex = -1;
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
 			bubbles: true,
 			composed: true,
 			detail: {
-				attributes: this.attributes
+				attributeList: this.attributeList
 			}
 		}));
 	}

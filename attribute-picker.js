@@ -5,6 +5,16 @@ import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles
 import { Localizer } from './localization.js';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 
+const keyCodes = {
+	ENTER: 13,
+	ESCAPE: 27,
+	BACKSPACE: 8,
+	LEFT: 37,
+	RIGHT: 39,
+	UP: 38,
+	DOWN: 40
+};
+
 class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	static get properties() {
 		return {
@@ -259,21 +269,26 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_onAttributeKeydown(e) {
-		if (e.keyCode === 8) {
-			this._removeAttributeIndex(this._activeAttributeIndex);
-			this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
-		}
-		else if (e.keyCode === 37) { // left arrow
-			if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributeList.length) {
-				this._activeAttributeIndex -= 1;
-			}
-		}
-		else if (e.keyCode === 39) { // right arrow
-			if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributeList.length - 1) {
-				this._activeAttributeIndex += 1;
-			} else {
-				this._activeAttributeIndex = -1;
+		switch (e.keyCode) {
+			case keyCodes.BACKSPACE: {
+				this._removeAttributeIndex(this._activeAttributeIndex);
 				this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
+				break;
+			}
+			case keyCodes.LEFT: {
+				if (this._activeAttributeIndex > 0 && this._activeAttributeIndex < this.attributeList.length) {
+					this._activeAttributeIndex -= 1;
+				}
+				break;
+			}
+			case keyCodes.RIGHT: {
+				if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < this.attributeList.length - 1) {
+					this._activeAttributeIndex += 1;
+				} else {
+					this._activeAttributeIndex = -1;
+					this.shadowRoot.querySelector('.d2l-attribute-picker-input').focus();
+				}
+				break;
 			}
 		}
 	}
@@ -297,75 +312,74 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		else {
 			this._dropdownIndex = this.shadowRoot.querySelector('li') !== null ? 0 : -1;
 		}
-
 	}
 
 	_onInputKeydown(e) {
-		if (e.keyCode === 27) { //Escape
-			if (this.allowFreeform) {
-				//Unselect any dropdown item so enter will apply to just the typed text instead
-				this._dropdownIndex = -1;
+		switch (e.keyCode) {
+			case keyCodes.ESCAPE: {
+				if (this.allowFreeform) {//Unselect any dropdown item so enter will apply to just the typed text instead
+					this._dropdownIndex = -1;
+				}
+				break;
 			}
-		}
-		if (e.keyCode === 8) { // Backspace
-			// if a value is selected, remove that value
-			if (this._activeAttributeIndex >= 0) {
-				this._removeAttributeIndex(this._activeAttributeIndex);
-				this._activeAttributeIndex = -1;
-				e.preventDefault();
-				return;
+			case keyCodes.BACKSPACE: {
+				if (this._activeAttributeIndex >= 0) {
+					this._removeAttributeIndex(this._activeAttributeIndex);
+					this._activeAttributeIndex = -1;
+					e.preventDefault();
+					return;
+				}
+				break;
 			}
-
-			// if we're at the beginning of the input,
-			// select the last value
-			if (e.srcElement.selectionStart === 0 &&
-                    e.srcElement.selectionEnd === 0) {
+			case keyCodes.LEFT: {
 				this._activeAttributeIndex = this.attributeList.length - 1;
+				break;
 			}
-		} else if (e.keyCode === 37) { // left arrow
-			this._activeAttributeIndex = this.attributeList.length - 1;
-
-		} else if (e.keyCode === 38) { // up arrow
-			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
-			if (this._dropdownIndex === -1) {
-				this._dropdownIndex = assignableCount - 1;
-			} else {
-				this._dropdownIndex = this._mod(this._dropdownIndex - 1, assignableCount);
-			}
-			this._updateDropdownFocus();
-
-		} else if (e.keyCode === 40) { // down arrow
-			const assignableCount = this.shadowRoot.querySelectorAll('li').length;
-			this._dropdownIndex = this._mod(this._dropdownIndex + 1, assignableCount);
-			this._updateDropdownFocus();
-
-		} else if (e.keyCode === 13) { //Enter
-			const list = this.shadowRoot.querySelectorAll('li');
-			if (this._attributeLimitReached()) {
-				this.dispatchEvent(new CustomEvent('attribute-limit-reached', {
-					bubbles: true,
-					composed: true,
-					detail: {
-						limit: this.limit
-					}
-				}));
-				return;
-			}
-
-			if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
-				this._addAttribute(list[this._dropdownIndex].text);
-				this._text = '';
-				if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
-					this._dropdownIndex --;
+			case keyCodes.UP: {
+				const assignableCount = this.shadowRoot.querySelectorAll('li').length;
+				if (this._dropdownIndex === -1) {
+					this._dropdownIndex = assignableCount - 1;
+				} else {
+					this._dropdownIndex = this._mod(this._dropdownIndex - 1, assignableCount);
 				}
-			} else if (this.allowFreeform) {
-				const trimmedAttribute =  this._text.trim();
-				if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
-					this._addAttribute(this._text.trim());
+				this._updateDropdownFocus();
+				break;
+			}
+			case keyCodes.DOWN: {
+				const assignableCount = this.shadowRoot.querySelectorAll('li').length;
+				this._dropdownIndex = this._mod(this._dropdownIndex + 1, assignableCount);
+				this._updateDropdownFocus();
+				break;
+			}
+			case keyCodes.ENTER: {
+				const list = this.shadowRoot.querySelectorAll('li');
+				if (this._attributeLimitReached()) {
+					this.dispatchEvent(new CustomEvent('attribute-limit-reached', {
+						bubbles: true,
+						composed: true,
+						detail: {
+							limit: this.limit
+						}
+					}));
+					return;
+				}
+
+				if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
+					this._addAttribute(list[this._dropdownIndex].text);
 					this._text = '';
+					if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
+						this._dropdownIndex --;
+					}
+				} else if (this.allowFreeform) {
+					const trimmedAttribute =  this._text.trim();
+					if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
+						this._addAttribute(this._text.trim());
+						this._text = '';
+					}
 				}
+				this._updateDropdownFocus();
+				break;
 			}
-			this._updateDropdownFocus();
 		}
 	}
 

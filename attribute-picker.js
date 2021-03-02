@@ -1,4 +1,5 @@
 import '@brightspace-ui/core/components/icons/icon.js';
+import '@brightspace-ui/core/components/colors/colors.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
 import { Localizer } from './lang/localization.js';
@@ -53,7 +54,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				display: none;
 			}
 			.d2l-attribute-picker-container {
-				background-color: #ffffff;
+				background-color: white;
 				border-color: var(--d2l-color-mica);
 				border-radius: 6px;
 				border-style: solid;
@@ -93,17 +94,17 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			}
 			.d2l-attribute-picker-attribute:focus, .d2l-attribute-picker-attribute:focus > d2l-icon {
 				background-color: var(--d2l-color-celestine);
-				color: #ffffff;
+				color: white;
 				outline: none;
 			}
 			d2l-icon {
-				color: rgba(86, 90, 92, 0.5); /* --d2l-color-ferrite @ 50% */
+				color: var(--d2l-color-galena);
 				/* display: none; */
 				margin-left: 0.3rem;
 			}
 			.d2l-attribute-picker-attribute:focus > d2l-icon,
 			.d2l-attribute-picker-attribute:focus > d2l-icon:hover {
-				color: #ffffff;
+				color: white;
 			}
 			.d2l-attribute-picker-input {
 				background: transparent;
@@ -116,7 +117,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				width: 10px;
 			}
 			.d2l-attribute-list {
-				background-color: #ffffff;
+				background-color: white;
 				border: 1px solid #dddddd;
 				border-radius: 6px;
 				list-style: none;

@@ -2,7 +2,7 @@ import '@brightspace-ui/core/components/icons/icon.js';
 import '@brightspace-ui/core/components/colors/colors.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles.js';
-import { Localizer } from './lang/localization.js';
+import { Localizer } from './localization.js';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 
 class AttributePicker extends RtlMixin(Localizer(LitElement)) {

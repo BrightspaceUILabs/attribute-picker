@@ -28,7 +28,7 @@
     "deepmerge": "^3",
     "es-dev-server": "^1",
     "eslint": "^6",
-    "eslint-config-brightspace": "^0.6.7",
+    "eslint-config-brightspace": "^0.13.0",
     "eslint-plugin-html": "^6",
     "eslint-plugin-lit": "^1",
     "eslint-plugin-sort-class-members": "^1",
@@ -39,7 +39,8 @@
     "puppeteer": "^1"
   },
   "dependencies": {
-    "@brightspace-ui/core": "^1.52.5",
+    "@babel/eslint-parser": "^7.13.8",
+    "@brightspace-ui/core": "^1.117.1",
     "@webcomponents/webcomponentsjs": "^2",
     "lit-element": "^2",
     "stylelint": "^13.11.0"

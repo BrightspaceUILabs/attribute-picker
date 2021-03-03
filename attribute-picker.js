@@ -168,20 +168,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		this._dropdownIndex = -1;
 	}
 
-	clearText() {
-		this._text = '';
-	}
-
-	updated(changedProperties) {
-		super.updated(changedProperties);
-		if (changedProperties.has('_activeAttributeIndex')) {
-			this._activeAttributeIndexChanged(this._activeAttributeIndex);
-		}
-		if (changedProperties.has('assignableAttributes')) {
-			this._assignableAttributesChanged();
-		}
-	}
-
 	render() {
 		//Hash active attributes and filter out unavailable and unmatching dropdown items.
 		const hash = {};
@@ -252,6 +238,61 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			</div>
 		</div>
 		`;
+	}
+
+	updated(changedProperties) {
+		super.updated(changedProperties);
+		if (changedProperties.has('_activeAttributeIndex')) {
+			this._activeAttributeIndexChanged(this._activeAttributeIndex);
+		}
+		if (changedProperties.has('assignableAttributes')) {
+			this._assignableAttributesChanged();
+		}
+	}
+
+	clearText() {
+		this._text = '';
+	}
+
+	_activeAttributeIndexChanged() {
+		const selectedAttributes = this.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
+		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
+			selectedAttributes[this._activeAttributeIndex].focus();
+		}
+	}
+
+	_addAttribute(newValue) {
+		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
+			return;
+		}
+		this.attributeList = [...this.attributeList, newValue];
+		this.requestUpdate();
+
+		this.dispatchEvent(new CustomEvent('attributes-changed', {
+			bubbles: true,
+			composed: true,
+			detail: {
+				attributeList: this.attributeList
+			}
+		}));
+	}
+
+	_assignableAttributesChanged() {
+		this._dropdownIndex = -1;
+	}
+
+	_attributeLimitReached() {
+		return this.limit && (this.attributeList.length >= this.limit);
+	}
+
+	_menuItemFocused(e) {
+		this._addAttribute(e.target.text);
+		this._menuItemFocused = true;
+	}
+
+	// Absolute value % operator for navigating menus.
+	_mod(x, y) {
+		return ((x % y) + y) % y;
 	}
 
 	/* Event handlers */
@@ -397,43 +438,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		e.preventDefault();
 	}
 
-	_activeAttributeIndexChanged() {
-		const selectedAttributes = this.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
-		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
-			selectedAttributes[this._activeAttributeIndex].focus();
-		}
-	}
-
-	_assignableAttributesChanged() {
-		this._dropdownIndex = -1;
-	}
-
-	/* Helper functions */
-	_addAttribute(newValue) {
-		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
-			return;
-		}
-		this.attributeList = [...this.attributeList, newValue];
-		this.requestUpdate();
-
-		this.dispatchEvent(new CustomEvent('attributes-changed', {
-			bubbles: true,
-			composed: true,
-			detail: {
-				attributeList: this.attributeList
-			}
-		}));
-	}
-
-	_attributeLimitReached() {
-		return this.limit && (this.attributeList.length >= this.limit);
-	}
-
-	_menuItemFocused(e) {
-		this._addAttribute(e.target.text);
-		this._menuItemFocused = true;
-	}
-
 	_removeAttributeIndex(index) {
 		this.attributeList = this.attributeList.slice(0, index).concat(this.attributeList.slice(index + 1, this.attributeList.length));
 		this._activeAttributeIndex = -1;
@@ -454,11 +458,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				items[this._dropdownIndex].scrollIntoViewIfNeeded(false);
 			}
 		});
-	}
-
-	// Absolute value % operator for navigating menus.
-	_mod(x, y) {
-		return ((x % y) + y) % y;
 	}
 }
 customElements.define('d2l-labs-attribute-picker', AttributePicker);

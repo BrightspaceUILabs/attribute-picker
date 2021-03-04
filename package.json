@@ -44,5 +44,5 @@
     "lit-element": "^2",
     "stylelint": "^13.11.0"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

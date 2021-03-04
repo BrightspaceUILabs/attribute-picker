@@ -455,7 +455,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		this.updateComplete.then(() => {
 			const items = this.shadowRoot.querySelectorAll('li');
 			if (items.length > 0 && this._dropdownIndex >= 0) {
-				items[this._dropdownIndex].scrollIntoViewIfNeeded(false);
+				items[this._dropdownIndex].scrollIntoView({ block: 'nearest' });
+
 			}
 		});
 	}

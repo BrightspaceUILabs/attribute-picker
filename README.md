@@ -43,10 +43,10 @@ npm install @brightspace-ui-labs/attribute-picker
 |--|--|--|
 | allow-freeform | Boolean | When enabled, the user can manually type any attribute they wish. If false, they must select from the dropdown. |
 | aria-label | String | Required. When true, the autocomplete dropdown will not be displayed to the user. |
-| attributes | Array |  An array of strings representing the attributes currently selected in the picker. |
+| attribute-list | Array |  An array of strings representing the attributes currently selected in the picker. |
 | assignable-attributes | Array | An array of strings available in the dropdown list. |
 | hide-dropdown | Boolean | When enabled, the autocomplete dropdown will not be displayed to the user. |
-| limit | Number | The maximum number of attributes permitted. |
+| limit | Number | The maximum length of attribute-list permitted. |
 
 **Accessibility:**
 
@@ -60,7 +60,7 @@ To make your usage of `d2l-labs-attribute-picker` accessible, use the following 
 The `d2l-labs-attribute-picker` dispatches the `attributes-changed` event each time an attribute has been added or removed. It will return the updated list of attributes:
 ```javascript
 attributePicker.addEventListener('attributes-changed', (e) => {
-  console.log(e.detail.attributes.toString());
+  console.log(e.detail.attributeList.toString());
 });
 ```
 

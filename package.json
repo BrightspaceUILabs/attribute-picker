@@ -19,10 +19,12 @@
   "author": "D2L Corporation",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@babel/eslint-parser": "^7.13.8",
     "@brightspace-ui/stylelint-config": "0.0.1",
     "@brightspace-ui/visual-diff": "^3",
     "@open-wc/testing": "^2",
     "@open-wc/testing-karma": "^4",
+    "@webcomponents/webcomponentsjs": "^2",
     "babel-eslint": "^10",
     "deepmerge": "^3",
     "es-dev-server": "^2",
@@ -37,10 +39,11 @@
     "lit-analyzer": "^1",
     "puppeteer": "^8"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-    "@babel/eslint-parser": "^7.13.8",
     "@brightspace-ui/core": "^1.117.1",
-    "@webcomponents/webcomponentsjs": "^2",
     "lit-element": "^2",
     "stylelint": "^13.11.0"
   },

@@ -43,7 +43,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@brightspace-ui/core": "^1.117.1",
+    "@brightspace-ui/core": "^1.118.1",
     "lit-element": "^2",
     "stylelint": "^13.11.0"
   },

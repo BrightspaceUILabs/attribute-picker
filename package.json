@@ -21,7 +21,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@brightspace-ui/stylelint-config": "0.0.1",
-    "@brightspace-ui/visual-diff": "^1",
+    "@brightspace-ui/visual-diff": "^3",
     "@open-wc/testing": "^2",
     "@open-wc/testing-karma": "^4",
     "babel-eslint": "^10",

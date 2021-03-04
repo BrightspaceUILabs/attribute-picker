@@ -23,7 +23,7 @@
     "@brightspace-ui/stylelint-config": "0.0.1",
     "@brightspace-ui/visual-diff": "^1",
     "@open-wc/testing": "^2",
-    "@open-wc/testing-karma": "^3",
+    "@open-wc/testing-karma": "^4",
     "babel-eslint": "^10",
     "deepmerge": "^3",
     "es-dev-server": "^1",
@@ -45,5 +45,5 @@
     "lit-element": "^2",
     "stylelint": "^13.11.0"
   },
-  "version": "0.0.0"
+  "version": "0.0.1"
 }

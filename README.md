@@ -18,7 +18,9 @@
 > - [ ] Demo page
 > - [ ] README documentation
 
-Autocompleting dropdown to choose one or more new or pre-existing attributes
+Autocompleting dropdown to choose one or more new or pre-existing attributes.
+
+![animated screenshot of attribute picker](./screenshot.gif)
 
 ## Installation
 

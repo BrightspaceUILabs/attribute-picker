@@ -269,7 +269,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		this._text = '';
 
 		//Ensure the dropdown index doesn't go out of bounds after adding this attribute
-		const list = this.shadowRoot.querySelectorAll('li')
+		const list = this.shadowRoot.querySelectorAll('li');
 		if (this._dropdownIndex > -1 && (list.length === 1 || list.length - 1 === this._dropdownIndex)) {
 			this._dropdownIndex --;
 		}

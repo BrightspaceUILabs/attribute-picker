@@ -266,6 +266,14 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			return;
 		}
 		this.attributeList = [...this.attributeList, newValue];
+		this._text = '';
+
+		//Ensure the dropdown index doesn't go out of bounds after adding this attribute
+		const list = this.shadowRoot.querySelectorAll('li')
+		if (this._dropdownIndex > -1 && (list.length === 1 || list.length - 1 === this._dropdownIndex)) {
+			this._dropdownIndex --;
+		}
+
 		this.requestUpdate();
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
@@ -283,11 +291,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	_attributeLimitReached() {
 		return this.limit && (this.attributeList.length >= this.limit);
-	}
-
-	_menuItemFocused(e) {
-		this._addAttribute(e.target.text);
-		this._menuItemFocused = true;
 	}
 
 	// Absolute value % operator for navigating menus.
@@ -407,15 +410,10 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 				if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 					this._addAttribute(list[this._dropdownIndex].text);
-					this._text = '';
-					if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
-						this._dropdownIndex --;
-					}
 				} else if (this.allowFreeform) {
 					const trimmedAttribute =  this._text.trim();
 					if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
 						this._addAttribute(this._text.trim());
-						this._text = '';
 					}
 				}
 				this._updateDropdownFocus();

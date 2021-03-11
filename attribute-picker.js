@@ -424,6 +424,10 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	_onInputTextChanged(event) {
 		this._text = event.target.value;
+		if (this._dropdownIndex >= 0) {
+			this._dropdownIndex = 0;
+		}
+
 		this.requestUpdate();
 	}
 

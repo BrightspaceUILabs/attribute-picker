@@ -261,20 +261,22 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		}
 	}
 
-	_addAttribute(newValue) {
+	async _addAttribute(newValue) {
 		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
 			return;
 		}
 		this.attributeList = [...this.attributeList, newValue];
 		this._text = '';
 
-		//Ensure the dropdown index doesn't go out of bounds after adding this attribute
+		//Wait until we can get the full list of available list items after clearing the text
+		await this.updateComplete;
+
 		const list = this.shadowRoot.querySelectorAll('li');
-		if (this._dropdownIndex > -1 && (list.length === 1 || list.length - 1 === this._dropdownIndex)) {
+
+		//If we removed the final index of the list, move our index back to compensate
+		if (this._dropdownIndex > -1 && this._dropdownIndex > list.length - 1) {
 			this._dropdownIndex --;
 		}
-
-		this.requestUpdate();
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
 			bubbles: true,
@@ -425,9 +427,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	_onInputTextChanged(event) {
 		this._text = event.target.value;
 		if (this._dropdownIndex >= 0) {
-			this._dropdownIndex = 0;
+			this.allowFreeform ? this._dropdownIndex = -1 : this._dropdownIndex = 0;
 		}
-
 		this.requestUpdate();
 	}
 

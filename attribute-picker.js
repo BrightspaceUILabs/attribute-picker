@@ -71,6 +71,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				border-width: 1px;
 				box-shadow: inset 0 2px 0 0 rgba(185, 194, 208, 0.2);
 				padding: 5px 5px 5px 5px;
+				position: relative;
 				vertical-align: middle;
 			}
 			.d2l-attribute-picker-container-focused {
@@ -150,8 +151,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 			.d2l-attribute-picker-absolute-container {
 				margin: 0 0.3rem 0 -0.3rem;
-				min-width: 96.5%;
 				position: absolute;
+				width: 100%;
 				z-index: 1;
 			}
 		`];

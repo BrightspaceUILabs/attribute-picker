@@ -151,8 +151,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 			.d2l-attribute-picker-absolute-container {
 				margin: 0 0.3rem 0 -0.3rem;
-				width: 100%;
 				position: absolute;
+				width: 100%;
 				z-index: 1;
 			}
 		`];

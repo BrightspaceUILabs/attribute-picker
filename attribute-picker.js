@@ -261,12 +261,22 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		}
 	}
 
-	_addAttribute(newValue) {
+	async _addAttribute(newValue) {
 		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
 			return;
 		}
 		this.attributeList = [...this.attributeList, newValue];
-		this.requestUpdate();
+		this._text = '';
+
+		//Wait until we can get the full list of available list items after clearing the text
+		await this.updateComplete;
+
+		const list = this.shadowRoot.querySelectorAll('li');
+
+		//If we removed the final index of the list, move our index back to compensate
+		if (this._dropdownIndex > -1 && this._dropdownIndex > list.length - 1) {
+			this._dropdownIndex --;
+		}
 
 		this.dispatchEvent(new CustomEvent('attributes-changed', {
 			bubbles: true,
@@ -283,11 +293,6 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	_attributeLimitReached() {
 		return this.limit && (this.attributeList.length >= this.limit);
-	}
-
-	_menuItemFocused(e) {
-		this._addAttribute(e.target.text);
-		this._menuItemFocused = true;
 	}
 
 	// Absolute value % operator for navigating menus.
@@ -407,15 +412,10 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 				if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
 					this._addAttribute(list[this._dropdownIndex].text);
-					this._text = '';
-					if (list.length === 1 || list.length - 1 === this._dropdownIndex) {
-						this._dropdownIndex --;
-					}
 				} else if (this.allowFreeform) {
 					const trimmedAttribute =  this._text.trim();
 					if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
 						this._addAttribute(this._text.trim());
-						this._text = '';
 					}
 				}
 				this._updateDropdownFocus();
@@ -426,6 +426,9 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 
 	_onInputTextChanged(event) {
 		this._text = event.target.value;
+		if (this._dropdownIndex >= 0) {
+			this.allowFreeform ? this._dropdownIndex = -1 : this._dropdownIndex = 0;
+		}
 		this.requestUpdate();
 	}
 

@@ -71,8 +71,8 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				border-width: 1px;
 				box-shadow: inset 0 2px 0 0 rgba(185, 194, 208, 0.2);
 				padding: 5px 5px 5px 5px;
-				vertical-align: middle;
 				position: relative;
+				vertical-align: middle;
 			}
 			.d2l-attribute-picker-container-focused {
 				border-color: var(--d2l-color-celestine);

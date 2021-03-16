@@ -251,21 +251,23 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		}
 	}
 
-	clearText() {
-		this._text = '';
-	}
-
-	_activeAttributeIndexChanged() {
-		const selectedAttributes = this.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
-		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
-			selectedAttributes[this._activeAttributeIndex].focus();
-		}
-	}
-
-	async _addAttribute(newValue) {
+	//Returns true or false depending on if the attribute was successfully added. Fires the d2l-attribute-limit-reached event if necessary.
+	async addAttribute(newValue) {
 		if (!newValue || this.attributeList.findIndex(attribute => attribute.value === newValue) >= 0) {
-			return;
+			return false;
 		}
+
+		if (this._attributeLimitReached()) {
+			this.dispatchEvent(new CustomEvent('d2l-attribute-limit-reached', {
+				bubbles: true,
+				composed: true,
+				detail: {
+					limit: this.limit
+				}
+			}));
+			return false;
+		}
+
 		this.attributeList = [...this.attributeList, newValue];
 		this._text = '';
 
@@ -286,6 +288,19 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 				attributeList: this.attributeList
 			}
 		}));
+
+		return true;
+	}
+
+	clearText() {
+		this._text = '';
+	}
+
+	_activeAttributeIndexChanged() {
+		const selectedAttributes = this.shadowRoot.querySelectorAll('.d2l-attribute-picker-attribute');
+		if (this._activeAttributeIndex >= 0 && this._activeAttributeIndex < selectedAttributes.length) {
+			selectedAttributes[this._activeAttributeIndex].focus();
+		}
 	}
 
 	_assignableAttributesChanged() {
@@ -400,23 +415,12 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			}
 			case keyCodes.ENTER: {
 				const list = this.shadowRoot.querySelectorAll('li');
-				if (this._attributeLimitReached()) {
-					this.dispatchEvent(new CustomEvent('d2l-attribute-limit-reached', {
-						bubbles: true,
-						composed: true,
-						detail: {
-							limit: this.limit
-						}
-					}));
-					return;
-				}
-
 				if (this._dropdownIndex >= 0 && this._dropdownIndex < list.length) {
-					this._addAttribute(list[this._dropdownIndex].text);
+					this.addAttribute(list[this._dropdownIndex].text);
 				} else if (this.allowFreeform) {
 					const trimmedAttribute =  this._text.trim();
 					if (trimmedAttribute.length > 0 && !this.attributeList.includes(trimmedAttribute)) {
-						this._addAttribute(this._text.trim());
+						this.addAttribute(this._text.trim());
 					}
 				}
 				this._updateDropdownFocus();
@@ -438,7 +442,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 	}
 
 	_onListItemTapped(e) {
-		this._addAttribute(e.target.text);
+		this.addAttribute(e.target.text);
 		e.preventDefault();
 	}
 

@@ -356,7 +356,7 @@ describe('d2l-labs-attribute-picker', () => {
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13 }));
 			await element.requestUpdate;
 			expect(element.attributeList.length).to.equal(5);
-			element.shadowRoot.querySelector('input').text = 'six';
+			element._text = 'six';
 			pageNumberInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13 }));
 			expect(element.attributeList.length).to.equal(5);
 			await element.requestUpdate;

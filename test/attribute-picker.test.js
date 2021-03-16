@@ -315,8 +315,8 @@ describe('d2l-labs-attribute-picker', () => {
 			);
 		});
 
-		it('should fire the attributes-changed event when adding a tag', async() => {
-			const listener = oneEvent(el, 'attributes-changed');
+		it('should fire the d2l-attributes-changed event when adding a tag', async() => {
+			const listener = oneEvent(el, 'd2l-attributes-changed');
 
 			const pageNumberInput = el.shadowRoot.querySelector('input');
 			pageNumberInput.focus();
@@ -328,8 +328,8 @@ describe('d2l-labs-attribute-picker', () => {
 			expect(result.detail.attributeList.length).to.equal(4);
 		});
 
-		it('should fire the attributes-changed event when removing a tag', async() => {
-			const listener = oneEvent(el, 'attributes-changed');
+		it('should fire the d2l-attributes-changed event when removing a tag', async() => {
+			const listener = oneEvent(el, 'd2l-attributes-changed');
 
 			const pageNumberInput = el.shadowRoot.querySelector('input');
 			pageNumberInput.focus();
@@ -340,8 +340,8 @@ describe('d2l-labs-attribute-picker', () => {
 			expect(result).to.not.equal('no event fired');
 		});
 
-		it('should fire the attribute-limit-reached event when attempting to add a tag beyond the limit', async() => {
-			const listener = oneEvent(el, 'attribute-limit-reached');
+		it('should fire the d2l-attribute-limit-reached event when attempting to add a tag beyond the limit', async() => {
+			const listener = oneEvent(el, 'd2l-attribute-limit-reached');
 
 			const element = el; //require-atomic-updates deems this necessary
 			const pageNumberInput = el.shadowRoot.querySelector('input');

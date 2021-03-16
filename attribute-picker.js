@@ -279,7 +279,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			this._dropdownIndex --;
 		}
 
-		this.dispatchEvent(new CustomEvent('attributes-changed', {
+		this.dispatchEvent(new CustomEvent('d2l-attributes-changed', {
 			bubbles: true,
 			composed: true,
 			detail: {
@@ -401,7 +401,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 			case keyCodes.ENTER: {
 				const list = this.shadowRoot.querySelectorAll('li');
 				if (this._attributeLimitReached()) {
-					this.dispatchEvent(new CustomEvent('attribute-limit-reached', {
+					this.dispatchEvent(new CustomEvent('d2l-attribute-limit-reached', {
 						bubbles: true,
 						composed: true,
 						detail: {
@@ -446,7 +446,7 @@ class AttributePicker extends RtlMixin(Localizer(LitElement)) {
 		this.attributeList = this.attributeList.slice(0, index).concat(this.attributeList.slice(index + 1, this.attributeList.length));
 		this._activeAttributeIndex = -1;
 
-		this.dispatchEvent(new CustomEvent('attributes-changed', {
+		this.dispatchEvent(new CustomEvent('d2l-attributes-changed', {
 			bubbles: true,
 			composed: true,
 			detail: {

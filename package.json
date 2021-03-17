@@ -1,6 +1,6 @@
 {
   "name": "@brightspace-ui-labs/attribute-picker",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Autocompleting dropdown to choose one or more new or pre-existing attributes",
   "repository": "https://github.com/BrightspaceUILabs/attribute-picker.git",
   "scripts": {

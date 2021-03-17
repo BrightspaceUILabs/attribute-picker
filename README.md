@@ -59,14 +59,14 @@ To make your usage of `d2l-labs-attribute-picker` accessible, use the following 
 | aria-label | The label should provide context for the attribute picker, such as type of attribute. |
 
 **Events:**
-The `d2l-labs-attribute-picker` dispatches the `attributes-changed` event each time an attribute has been added or removed. It will return the updated list of attributes:
+The `d2l-labs-attribute-picker` dispatches the `d2l-attributes-changed` event each time an attribute has been added or removed. It will return the updated list of attributes:
 ```javascript
-attributePicker.addEventListener('attributes-changed', (e) => {
+attributePicker.addEventListener('d2l-attributes-changed', (e) => {
   console.log(e.detail.attributeList.toString());
 });
 ```
 
-The `d2l-labs-attribute-picker` dispatches the `attribute-limit-reached` event when the user attempts to enter an attribute greater than the limit. This can be used to send feedback to the user.
+The `d2l-labs-attribute-picker` dispatches the `d2l-attribute-limit-reached` event when the user attempts to enter an attribute greater than the limit. This can be used to send feedback to the user.
 
 ## Developing, Testing and Contributing
 

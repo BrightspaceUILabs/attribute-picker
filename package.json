@@ -38,14 +38,14 @@
     "karma": "^6.1.1",
     "karma-sauce-launcher": "^4",
     "lit-analyzer": "^1",
-    "puppeteer": "^8"
+    "puppeteer": "^8",
+    "stylelint": "^13"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@brightspace-ui/core": "^1",
-    "lit-element": "^2",
-    "stylelint": "^13.11.0"
+    "lit-element": "^2"
   }
 }

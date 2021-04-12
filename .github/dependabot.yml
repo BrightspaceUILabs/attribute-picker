@@ -1,6 +1,13 @@
 version: 2
+registries:
+  d2l:
+    type: npm-registry
+    url: https://d2lartifacts.jfrog.io/artifactory/api/npm/npm-local
+    token: ${{secrets.DBOT_ARTIFACTORY_NPM_RO_TOKEN}}
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    registries:
+      - d2l

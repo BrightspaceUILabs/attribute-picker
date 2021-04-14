@@ -1,6 +1,6 @@
 [
   {
-    "name": "pagination",
+    "name": "attribute-picker",
     "parser_plugin": {
       "plugin": "parse_js"
     },
@@ -9,18 +9,17 @@
     "output_file_path": "/lang/%LANG%.js",
     "output_lang_rewrite": [
       "ar-sa ar",
+      "cy-gb cy",
+      "da-dk da",
       "de-de de",
       "es-mx es",
-      "fi-FI fi",
       "fr-ca fr",
       "ja-jp ja",
       "ko-kr ko",
       "nl-nl nl",
       "pt-br pt",
       "sv-se sv",
-      "tr-tr tr",
-      "zh-cn zh",
-      "zh-tw zh-tw"
+      "tr-tr tr"
     ]
   }
 ]
